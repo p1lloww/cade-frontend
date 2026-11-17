@@ -1,0 +1,32 @@
+.header {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 3.5rem;
+  padding-block: var(--space-2);
+}
+
+.header__brand {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.header__subtitle {
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.header__brand:focus-visible {
+  outline-color: var(--color-on-primary);
+}

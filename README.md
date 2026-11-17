@@ -14,7 +14,19 @@ npm install
 npm start
 ```
 
-Abra http://localhost:4200. Em desenvolvimento, a API usada é a de `src/environments/environment.development.ts`.
+Abra http://localhost:4200. O front chama a API sempre em `/api`; em desenvolvimento, o `ng serve` repassa essas chamadas para o back-end em `http://localhost:8080` (regra em `proxy.conf.json`). Assim o navegador fala com um endereço só e não depende do CORS.
+
+## Estrutura
+
+```
+src/app/
+  core/       serviços usados pelo app inteiro (cliente da API, tratamento de erros, interceptors)
+  layout/     cabeçalho e estrutura da página
+  shared/     componentes reutilizáveis (ex.: caixa de erro)
+  features/   uma pasta por área, carregada sob demanda: public, student, staff, admin
+```
+
+Toda chamada à API passa pelo `ApiClient` (`core/api`), que transforma qualquer falha num `ApiError` com a mensagem devolvida pelo back-end. Para mostrar o erro, use `<app-error-message [error]="erro" />`.
 
 ## Testes
 
@@ -28,6 +40,9 @@ npm test
 npm run build
 ```
 
-A Vercel publica a pasta `dist/cade-frontend/browser`. O `vercel.json` redireciona todas as rotas para o `index.html` (aplicação de página única).
+A Vercel publica a pasta `dist/cade-frontend/browser`. O `vercel.json` faz duas coisas:
 
-O endereço da API em produção fica em `src/environments/environment.ts` e aponta para o domínio fixo do túnel (ngrok) do back-end.
+- repassa `/api/*` para o domínio fixo do túnel (ngrok) do back-end: troque `TROCAR-PELO-DOMINIO-DO-NGROK` pelo domínio de vocês;
+- manda as demais rotas para o `index.html` (aplicação de página única).
+
+Se o repasse não funcionar, coloque o domínio do ngrok direto em `src/environments/environment.ts` e libere o domínio da Vercel no `CORS_ORIGINS` do back-end.
