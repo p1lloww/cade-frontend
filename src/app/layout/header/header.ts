@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { homeFor } from '../../core/auth/role';
+import { Session } from '../../core/auth/session';
 
 @Component({
   selector: 'app-header',
@@ -7,4 +9,13 @@ import { RouterLink } from '@angular/router';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header {}
+export class Header {
+  private readonly router = inject(Router);
+  protected readonly session = inject(Session);
+  protected readonly homeFor = homeFor;
+
+  protected signOut(): void {
+    this.session.end();
+    void this.router.navigateByUrl('/');
+  }
+}

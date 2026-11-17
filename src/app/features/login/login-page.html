@@ -1,0 +1,108 @@
+<section class="card login">
+  @if (step() === 'email') {
+    <h1>Entrar</h1>
+    <p class="muted">Sem senha: enviamos um código para o seu e-mail institucional.</p>
+
+    @if (reason() === 'expired') {
+      <p class="alert alert--info" role="status">
+        Sua sessão expirou. Entre de novo para continuar.
+      </p>
+    }
+    <app-error-message [error]="error()" />
+
+    <form [formGroup]="emailForm" (ngSubmit)="requestCode()" novalidate>
+      <div class="field">
+        <label class="field__label" for="email">E-mail institucional</label>
+        <input
+          #emailInput
+          id="email"
+          class="input"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          autocapitalize="none"
+          spellcheck="false"
+          placeholder="nome@ucsal.edu.br"
+          formControlName="email"
+          [attr.aria-invalid]="fieldError('email') ? true : null"
+          [attr.aria-describedby]="fieldError('email') ? 'email-error' : null"
+        />
+        @if (fieldError('email'); as message) {
+          <span id="email-error" class="field__error">{{ message }}</span>
+        }
+      </div>
+
+      <button
+        class="button button--block"
+        type="submit"
+        [disabled]="submitting() || waitSeconds() > 0"
+      >
+        @if (submitting()) {
+          Enviando…
+        } @else if (waitSeconds() > 0) {
+          Aguarde {{ waitSeconds() }} s
+        } @else {
+          Receber código
+        }
+      </button>
+    </form>
+
+    @if (error()?.status === 429) {
+      <div class="login__actions">
+        <button class="button--link" type="button" (click)="useExistingCode()">
+          Já tenho um código
+        </button>
+      </div>
+    }
+  } @else {
+    <h1>Digite o código</h1>
+    <p class="muted">
+      Digite o código de 6 dígitos enviado para
+      <strong class="login__email">{{ sentTo() }}</strong
+      >. Ele vale por 10 minutos.
+    </p>
+
+    @if (notice(); as text) {
+      <p class="alert alert--success" role="status">{{ text }}</p>
+    }
+    <app-error-message [error]="error()" />
+
+    <form [formGroup]="codeForm" (ngSubmit)="signIn()" novalidate>
+      <div class="field">
+        <label class="field__label" for="code">Código</label>
+        <input
+          #codeInput
+          id="code"
+          class="input login__code"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          formControlName="code"
+          [attr.aria-invalid]="fieldError('code') ? true : null"
+          [attr.aria-describedby]="fieldError('code') ? 'code-hint code-error' : 'code-hint'"
+        />
+        <span id="code-hint" class="field__hint">Não chegou? Confira a caixa de spam.</span>
+        @if (fieldError('code'); as message) {
+          <span id="code-error" class="field__error">{{ message }}</span>
+        }
+      </div>
+
+      <button class="button button--block" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+
+    <div class="login__actions">
+      <button
+        class="button--link"
+        type="button"
+        (click)="resendCode()"
+        [disabled]="submitting() || waitSeconds() > 0"
+      >
+        {{ waitSeconds() > 0 ? 'Reenviar código em ' + waitSeconds() + ' s' : 'Reenviar código' }}
+      </button>
+      <button class="button--link" type="button" (click)="changeEmail()">Usar outro e-mail</button>
+    </div>
+  }
+</section>

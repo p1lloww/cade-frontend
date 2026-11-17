@@ -26,6 +26,10 @@ src/app/
   features/   uma pasta por área, carregada sob demanda: public, student, staff, admin
 ```
 
+## Login e perfis
+
+O login é sem senha (D02): a pessoa informa o e-mail @ucsal.edu.br, recebe um código de 6 dígitos (em desenvolvimento, ele aparece no Mailpit: http://localhost:8025) e troca o código por um token. O token fica no `localStorage` e vai no header `Authorization` de toda chamada à API (`core/auth/auth-interceptor.ts`). Cada área só abre para o seu perfil (`roleGuard`); sem login ou com o token vencido, a pessoa volta ao login e, depois de entrar, à página que tinha pedido. O administrador também entra na área da sala (`/staff`).
+
 Toda chamada à API passa pelo `ApiClient` (`core/api`), que transforma qualquer falha num `ApiError` com a mensagem devolvida pelo back-end. Para mostrar o erro, use `<app-error-message [error]="erro" />`.
 
 ## Testes
