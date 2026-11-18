@@ -68,7 +68,8 @@
               "buildTarget": "cade-frontend:build:production"
             },
             "development": {
-              "buildTarget": "cade-frontend:build:development"
+              "buildTarget": "cade-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
