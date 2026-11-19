@@ -30,3 +30,39 @@
 .header__brand:focus-visible {
   outline-color: var(--color-on-primary);
 }
+
+.header__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.header__email {
+  overflow: hidden;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header__action {
+  flex-shrink: 0;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-on-primary);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-on-primary);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header__action:hover {
+  background: rgb(255 255 255 / 0.15);
+}
+
+.header__action:focus-visible {
+  outline-color: var(--color-on-primary);
+}

@@ -1,8 +1,17 @@
 <header class="header">
   <div class="header__inner container">
-    <a class="header__brand" routerLink="/">
+    <a class="header__brand" [routerLink]="session.user() ? homeFor(session.user()!.role) : '/'">
       Cadê?
       <span class="header__subtitle">Achados e perdidos da UCSal</span>
     </a>
+
+    @if (session.user(); as user) {
+      <div class="header__account">
+        <span class="header__email">{{ user.email }}</span>
+        <button class="header__action" type="button" (click)="signOut()">Sair</button>
+      </div>
+    } @else {
+      <a class="header__action" routerLink="/login">Entrar</a>
+    }
   </div>
 </header>

@@ -1,0 +1,22 @@
+.login {
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+.login__email {
+  overflow-wrap: anywhere;
+}
+
+.login__code {
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.login__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
