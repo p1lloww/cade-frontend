@@ -29,7 +29,24 @@ O back-end precisa estar rodando em `http://localhost:8080` (ver o README do `ca
 
 ## Stack
 
-Angular 22 (componentes standalone), SCSS, HttpClient com `fetch`, Vitest. Publicado na Vercel; o `vercel.json` manda todas as rotas para o `index.html`.
+Angular 22 (componentes standalone), PrimeNG 22, SCSS, HttpClient com `fetch`, Vitest. Publicado na Vercel; o `vercel.json` manda todas as rotas para o `index.html`.
+
+## Componentes (PrimeNG)
+
+O front é feito por uma ou duas pessoas, então **use os componentes prontos do PrimeNG** (botões, campos, tabelas, diálogos, toasts, upload etc.) antes de escrever um do zero.
+
+- **Tema:** `src/app/core/theme/primeng-preset.ts` (Aura com o azul do projeto, sempre no modo claro). Ajuste cores por ele, não sobrescrevendo classes `.p-*`. O CSS do PrimeNG fica na camada `primeng`, então o `styles.scss` sempre vence.
+- **Acessibilidade continua valendo (RNF10):** todo campo PrimeNG com `<label for>` visível, estado escrito (ex.: `p-tag` com o texto "alta", não só a cor) e área de toque de pelo menos 44 px.
+- **Licença:** o PrimeNG 22 é comercial; usamos a licença Community (grátis para estudantes, até 4 devs, válida até 22/08/2027). A chave fica em `primengLicense` nos dois arquivos de `src/environments/`. Ela vai no bundle e é pública, então não é segredo. Se aparecer um aviso de licença no canto da tela, a chave está faltando ou venceu. Não existe versão gratuita compatível com o Angular 22 (o PrimeNG 21 só roda no Angular 21).
+
+## Ferramentas para o Claude Code
+
+Já vêm no repositório e valem para quem abrir o projeto:
+
+- **Skills** (`.claude/skills/`, instaladas com `npx skills add https://github.com/angular/skills`; versões em `skills-lock.json`): `angular-developer` (guias de signals, formulários, rotas, HTTP, testes) é a que importa; `angular-new-app` serve só para projeto novo. Consulte a skill antes de gerar código Angular.
+- **Servidores MCP** (`.mcp.json`): `angular-cli` (documentação e boas práticas do Angular, usando o CLI do próprio projeto) e `primeng` (documentação e exemplos dos componentes). O Claude Code pede para aprovar na primeira vez.
+
+Depois de gerar código, rode `npm run build` e `npm test`.
 
 ## Arquitetura e regras
 

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "angular-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "ng",
+        "mcp"
+      ],
+      "env": {}
+    },
+    "primeng": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@primeng/mcp"
+      ],
+      "env": {}
+    }
+  }
+}
