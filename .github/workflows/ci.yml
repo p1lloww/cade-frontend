@@ -1,0 +1,43 @@
+# Builds the front end and runs the tests on each push to main and on each Pull Request to main (QUA-02, D12).
+# The "build" job is a required check of the "Proteção da main" ruleset.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run still going for the old commit; runs on main always finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configurar o Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar as dependências
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Testes
+        run: npm test -- --no-watch
