@@ -1,17 +1,28 @@
 <header class="header">
-  <div class="header__inner container">
-    <a class="header__brand" [routerLink]="session.user() ? homeFor(session.user()!.role) : '/'">
-      Cadê?
-      <span class="header__subtitle">Achados e perdidos da UCSal</span>
-    </a>
+  <div class="header__inner">
+    <a
+      class="header__brand"
+      aria-label="Cadê?, página inicial"
+      [routerLink]="session.user() ? homeFor(session.user()!.role) : '/'"
+      >Cadê<span class="header__question" aria-hidden="true">?</span></a
+    >
 
     @if (session.user(); as user) {
       <div class="header__account">
         <span class="header__email">{{ user.email }}</span>
-        <button class="header__action" type="button" (click)="signOut()">Sair</button>
+        <button class="button button--secondary header__action" type="button" (click)="signOut()">
+          Sair
+        </button>
       </div>
     } @else {
-      <a class="header__action" routerLink="/login">Entrar</a>
+      <a class="button button--secondary header__action" routerLink="/login">Entrar</a>
     }
+  </div>
+
+  <div class="band">
+    <div class="band__inner">
+      <span>Achados e Perdidos da UCSal</span>
+      <span>Segunda a sexta, das 7h às 21h50</span>
+    </div>
   </div>
 </header>
