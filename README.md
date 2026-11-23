@@ -1,4 +1,5 @@
 # Cadê? — Achados e Perdidos UCSal (front-end)
+[![CI](https://github.com/p1lloww/cade-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/p1lloww/cade-frontend/actions/workflows/ci.yml)
 
 Front-end em Angular do Cadê?, publicado na Vercel. O README principal do projeto (problema, validação, integrantes, limitações e declaração de IA) fica no repositório do back-end: [cade-backend](https://github.com/p1lloww/cade-backend).
 
