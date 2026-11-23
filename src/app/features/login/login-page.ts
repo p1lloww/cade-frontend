@@ -29,6 +29,7 @@ const INSTITUTIONAL_EMAIL = /@ucsal\.edu\.br$/i;
  */
 @Component({
   selector: 'app-login-page',
+  host: { class: 'page' },
   imports: [ReactiveFormsModule, ErrorMessage],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',

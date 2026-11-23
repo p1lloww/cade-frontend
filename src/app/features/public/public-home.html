@@ -1,0 +1,49 @@
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__main">
+    <h1 id="hero-title" class="hero__title">Perdeu alguma coisa?</h1>
+    <p class="hero__lead">
+      Registre sua perda aqui. Se o objeto aparecer no Achados e Perdidos, você é chamado para
+      buscar no balcão.
+    </p>
+    <div class="hero__actions">
+      <a class="button button--large" [routerLink]="registerLossUrl">Registrar perda</a>
+      <a class="button button--large button--secondary" [routerLink]="myLossesUrl"
+        >Ver meus registros</a
+      >
+    </div>
+    <p class="hero__note">Entre com seu e-mail @ucsal.edu.br. Sem senha: enviamos um código.</p>
+  </div>
+
+  <aside class="info" aria-label="Onde fica e horário">
+    <div>
+      <h2 class="info__label">Onde fica</h2>
+      <p class="info__value">Perto da Administração da UCSal</p>
+      <p class="info__hint">Não achou? Pergunte a qualquer funcionário da UCSal.</p>
+    </div>
+    <hr class="info__divider" />
+    <div>
+      <h2 class="info__label">Horário</h2>
+      <p class="info__value">7h às 21h50</p>
+      <p class="info__hint">De segunda a sexta.</p>
+    </div>
+    <hr class="info__divider" />
+    <p class="info__hint">
+      Prefere ver de perto? Passe no Achados e Perdidos e confira com a equipe.
+    </p>
+  </aside>
+</section>
+
+<section class="how" aria-labelledby="how-title">
+  <div class="how__inner">
+    <h2 id="how-title" class="how__title">Como funciona</h2>
+    <ol class="how__steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="how__step">
+          <span class="how__number" aria-hidden="true">{{ i + 1 }}</span>
+          <h3 class="how__step-title">{{ step.title }}</h3>
+          <p class="how__step-text">{{ step.text }}</p>
+        </li>
+      }
+    </ol>
+  </div>
+</section>

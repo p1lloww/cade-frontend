@@ -42,7 +42,7 @@ describe('App', () => {
   });
 
   it.each<[string, string, Role | null]>([
-    ['/', 'Perdeu alguma coisa na UCSal?', null],
+    ['/', 'Perdeu alguma coisa?', null],
     ['/login', 'Entrar', null],
     ['/student', 'Área do estudante', 'STUDENT'],
     ['/staff', 'Área da sala', 'STAFF'],
