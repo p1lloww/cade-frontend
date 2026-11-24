@@ -67,7 +67,11 @@
     <div class="report__head">
       <div class="report__title">
         <span class="report__category">{{ item.report.categoryName }}</span>
-        <h3>{{ item.report.description }}</h3>
+        <h3>
+          <a class="report__link" [routerLink]="['/student/losses', item.report.id]">{{
+            item.report.description
+          }}</a>
+        </h3>
       </div>
       <span class="tag" [class]="tagClass(item.report.status)">{{ item.report.statusLabel }}</span>
     </div>
@@ -95,7 +99,10 @@
     }
 
     @if (item.report.status === 'AWAITING_INFO' && item.report.infoRequestReason) {
-      <p class="question"><strong>A sala perguntou:</strong> {{ item.report.infoRequestReason }}</p>
+      <div class="question">
+        <p><strong>A sala perguntou:</strong> {{ item.report.infoRequestReason }}</p>
+        <a class="button" [routerLink]="['/student/losses', item.report.id]">Responder</a>
+      </div>
     }
 
     <p class="report__meta">
@@ -108,5 +115,8 @@
     @if (item.report.status === 'OPEN' || item.report.status === 'AWAITING_INFO') {
       <p class="report__meta">Fica aberto até {{ formatDate(item.report.expiresAt) }}.</p>
     }
+    <a class="report__more" [routerLink]="['/student/losses', item.report.id]">
+      {{ isOngoing(item.report.status) ? 'Ver detalhes e opções' : 'Ver detalhes' }}
+    </a>
   </article>
 </ng-template>

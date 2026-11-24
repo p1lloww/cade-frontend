@@ -87,6 +87,10 @@ export default class MyLossReportsPage {
     });
   }
 
+  protected isOngoing(status: LossReportStatus): boolean {
+    return ONGOING_STATUSES.includes(status);
+  }
+
   protected tagClass(status: LossReportStatus): string {
     return TAG_BY_STATUS[status];
   }

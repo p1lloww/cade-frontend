@@ -22,6 +22,10 @@ function report(id: string, status: LossReportStatus, extra: Partial<LossReport>
     expiresAt: '2026-12-20T12:00:00Z',
     version: 0,
     infoRequestReason: null,
+    infoAnswer: null,
+    secretDetail: null,
+    proofPath: null,
+    proofSerialNumber: null,
     ...extra,
   };
 }
