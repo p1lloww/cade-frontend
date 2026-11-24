@@ -1,0 +1,225 @@
+<a class="back" routerLink="/student">Voltar aos meus registros</a>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando o registro…</p>
+  }
+  @case ('error') {
+    <h1>Registro</h1>
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @case ('missing') {
+    <h1>Registro não encontrado</h1>
+    <p>Ele pode ter sido apagado, ou o endereço está incompleto.</p>
+  }
+  @default {
+    @if (report(); as r) {
+      <p class="category">{{ r.categoryName }}</p>
+      <div class="title">
+        <h1>{{ r.description }}</h1>
+        <span class="tag" [class]="tagClass()">{{ r.statusLabel }}</span>
+      </div>
+      <p class="status">{{ r.statusDescription }}</p>
+
+      @if (notice(); as text) {
+        <p id="notice" class="alert alert--success" role="status" tabindex="-1">{{ text }}</p>
+      }
+      <app-error-message [error]="error()" />
+
+      @if (r.status === 'AWAITING_INFO') {
+        <section class="box box--question" aria-labelledby="question-title">
+          <h2 id="question-title">A sala perguntou</h2>
+          <p class="question">{{ r.infoRequestReason }}</p>
+          <div class="field">
+            <label class="field__label" for="answer">Sua resposta</label>
+            <textarea
+              id="answer"
+              class="input input--area"
+              rows="3"
+              [attr.maxlength]="maxAnswerLength"
+              [formControl]="answer"
+              [attr.aria-invalid]="fieldErrors()['answer'] ? true : null"
+              [attr.aria-describedby]="fieldErrors()['answer'] ? 'answer-error' : null"
+            ></textarea>
+            @if (fieldErrors()['answer']; as message) {
+              <span id="answer-error" class="field__error">{{ message }}</span>
+            }
+          </div>
+          <button class="button" type="button" (click)="sendAnswer()" [disabled]="busy() !== null">
+            {{ busy() === 'answer' ? 'Enviando…' : 'Enviar resposta' }}
+          </button>
+        </section>
+      }
+
+      @if (summons(); as s) {
+        <section class="box box--pickup" aria-labelledby="pickup-title">
+          <h2 id="pickup-title">Busque no balcão até {{ formatDate(s.expiresAt) }}</h2>
+          <dl>
+            <div>
+              <dt>Onde</dt>
+              <dd>{{ s.place }}</dd>
+            </div>
+            <div>
+              <dt>Horário</dt>
+              <dd>{{ s.hours }}</dd>
+            </div>
+            <div>
+              <dt>O que levar</dt>
+              <dd>{{ s.whatToBring }}</dd>
+            </div>
+          </dl>
+        </section>
+      }
+
+      <section class="section" aria-labelledby="data-title">
+        <h2 id="data-title">O que você registrou</h2>
+        <dl class="data">
+          <div>
+            <dt>Onde</dt>
+            <dd>{{ r.locationsLabel }}</dd>
+          </div>
+          <div>
+            <dt>Quando</dt>
+            <dd>
+              {{ formatPeriod(r.lostFrom, r.lostUntil) }}{{ r.shift ? ' · ' + r.shiftLabel : '' }}
+            </dd>
+          </div>
+          <div>
+            <dt>Detalhe que só você sabe</dt>
+            <dd>{{ r.secretDetail || 'Não informado' }}</dd>
+          </div>
+          @if (r.infoAnswer) {
+            <div>
+              <dt>Sua última resposta à sala</dt>
+              <dd>{{ r.infoAnswer }}</dd>
+            </div>
+          }
+        </dl>
+        @if (canEdit()) {
+          <div class="renew">
+            <p>
+              Fica aberto até <strong>{{ formatDate(r.expiresAt) }}</strong
+              >.
+            </p>
+            <button
+              class="button button--secondary"
+              type="button"
+              (click)="renew()"
+              [disabled]="busy() !== null"
+            >
+              {{ busy() === 'renew' ? 'Renovando…' : 'Renovar por mais 30 dias' }}
+            </button>
+          </div>
+        }
+      </section>
+
+      @if (canAttachProof()) {
+        <section class="section" aria-labelledby="proof-title">
+          <h2 id="proof-title">Prova de que é seu</h2>
+          <p class="muted">
+            Uma foto antiga do objeto, a nota fiscal ou o número de série. Ajuda muito com celular,
+            notebook e outros objetos de valor. Só você e a equipe da sala veem.
+          </p>
+
+          @if (r.proofPath || r.proofSerialNumber) {
+            <div class="current">
+              @if (r.proofPath; as path) {
+                <app-api-photo
+                  class="current__photo"
+                  [path]="path + '?v=' + r.version"
+                  alt="Foto da prova enviada"
+                />
+              }
+              @if (r.proofSerialNumber) {
+                <p>
+                  Número de série: <strong>{{ r.proofSerialNumber }}</strong>
+                </p>
+              }
+            </div>
+          }
+
+          <div class="proof-form">
+            <input
+              id="proof-file"
+              class="proof-file"
+              type="file"
+              accept="image/*"
+              (change)="choosePhoto($event)"
+            />
+            <div class="proof-photo">
+              @if (proofPhotoUrl(); as url) {
+                <img [src]="url" alt="Foto escolhida para a prova" />
+              }
+              <label for="proof-file" class="button button--secondary">
+                {{
+                  proofPhotoUrl()
+                    ? 'Trocar a foto'
+                    : r.proofPath
+                      ? 'Enviar outra foto'
+                      : 'Escolher foto'
+                }}
+              </label>
+            </div>
+            <div class="field">
+              <label class="field__label" for="serialNumber"
+                >Número de série <span class="optional">(se tiver)</span></label
+              >
+              <input
+                id="serialNumber"
+                class="input"
+                type="text"
+                maxlength="60"
+                autocomplete="off"
+                [formControl]="serialNumber"
+              />
+            </div>
+            @if (fieldErrors()['proof']; as message) {
+              <p class="field__error">{{ message }}</p>
+            }
+            <button class="button" type="button" (click)="sendProof()" [disabled]="busy() !== null">
+              {{ busy() === 'proof' ? 'Salvando…' : 'Salvar prova' }}
+            </button>
+          </div>
+        </section>
+      }
+
+      @if (canEdit()) {
+        <section class="section cancel" aria-labelledby="cancel-title">
+          <h2 id="cancel-title">Já achou?</h2>
+          @if (confirmingCancel()) {
+            <div class="box box--danger">
+              <p>
+                <strong>Cancelar este registro?</strong> Ele é encerrado e a sala para de procurar.
+              </p>
+              <div class="actions">
+                <button
+                  class="button button--danger"
+                  type="button"
+                  (click)="confirmCancel()"
+                  [disabled]="busy() !== null"
+                >
+                  {{ busy() === 'cancel' ? 'Cancelando…' : 'Sim, cancelar' }}
+                </button>
+                <button
+                  class="button button--secondary"
+                  type="button"
+                  (click)="confirmingCancel.set(false)"
+                >
+                  Voltar
+                </button>
+              </div>
+            </div>
+          } @else {
+            <p class="muted">
+              Se o objeto apareceu, cancele o registro para a sala parar de procurar.
+            </p>
+            <button class="button--link" type="button" (click)="confirmingCancel.set(true)">
+              Cancelar o registro
+            </button>
+          }
+        </section>
+      }
+    }
+  }
+}

@@ -42,10 +42,19 @@ export interface LossReport {
   version: number;
   /** O que o funcionário pediu para saber; nulo se nunca houve pedido. */
   infoRequestReason: string | null;
+  /** A última resposta do estudante ao pedido; nula se não respondeu. */
+  infoAnswer: string | null;
+  secretDetail: string | null;
+  /** Caminho da foto da prova, para pedir com o token; nulo quando não há (RF15). */
+  proofPath: string | null;
+  proofSerialNumber: string | null;
 }
 
 export type LossReportStatus =
   'OPEN' | 'AWAITING_INFO' | 'SUMMONED' | 'COMPLETED' | 'EXPIRED' | 'CANCELLED' | 'REFUSED';
+
+/** Situações em que o estudante ainda pode cancelar e renovar o registro (RF17, RN14). */
+export const EDITABLE_STATUSES: readonly LossReportStatus[] = ['OPEN', 'AWAITING_INFO'];
 
 /** Situações em que o registro ainda conta para o limite de 5 (RN05). */
 export const ONGOING_STATUSES: readonly LossReportStatus[] = ['OPEN', 'AWAITING_INFO', 'SUMMONED'];
