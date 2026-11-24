@@ -1,0 +1,161 @@
+<a class="back" routerLink="/admin">Voltar à administração</a>
+<h1>Equipe da sala</h1>
+<p class="lead">Quem é funcionário pode cadastrar objetos, convocar e atender no balcão.</p>
+
+@if (notice(); as text) {
+  <p id="notice" class="alert alert--success" role="status" tabindex="-1">{{ text }}</p>
+}
+
+<ng-template #changePanel let-account>
+  @if (isPending(account)) {
+    <div class="panel" [class.panel--remove]="pending()!.role === 'STUDENT'">
+      @if (pending()!.role === 'STUDENT') {
+        <p>
+          <strong>Retirar o perfil de funcionário?</strong> A conta volta a ser de estudante e perde
+          o acesso à área da sala no próximo login.
+        </p>
+      } @else {
+        <p>
+          <strong>Dar o perfil de funcionário?</strong> A pessoa passa a cadastrar objetos, convocar
+          e atender no balcão a partir do próximo login.
+        </p>
+      }
+      <app-error-message [error]="error()" />
+      <div class="field">
+        <label class="field__label" for="reason">Motivo</label>
+        <span id="reason-hint" class="field__hint">Fica no histórico.</span>
+        <input
+          id="reason"
+          class="input"
+          type="text"
+          maxlength="500"
+          [placeholder]="
+            pending()!.role === 'STUDENT'
+              ? 'Ex.: saiu da equipe da sala'
+              : 'Ex.: entrou na equipe da sala'
+          "
+          [formControl]="reason"
+          [attr.aria-invalid]="reasonError() ? true : null"
+          [attr.aria-describedby]="reasonError() ? 'reason-hint reason-error' : 'reason-hint'"
+        />
+        @if (reasonError(); as message) {
+          <span id="reason-error" class="field__error">{{ message }}</span>
+        }
+      </div>
+      <div class="panel__actions">
+        <button
+          class="button"
+          [class.button--danger]="pending()!.role === 'STUDENT'"
+          type="button"
+          (click)="confirm()"
+          [disabled]="saving()"
+        >
+          @if (saving()) {
+            Salvando…
+          } @else {
+            {{ pending()!.role === 'STUDENT' ? 'Confirmar retirada' : 'Confirmar' }}
+          }
+        </button>
+        <button class="button button--secondary" type="button" (click)="cancel()">Cancelar</button>
+      </div>
+    </div>
+  }
+</ng-template>
+
+<section class="section" aria-labelledby="staff-title">
+  <h2 id="staff-title">Funcionários</h2>
+  @switch (staffState()) {
+    @case ('loading') {
+      <p class="muted" role="status">Carregando a equipe…</p>
+    }
+    @case ('error') {
+      <app-error-message [error]="staffError()" />
+      <button class="button button--secondary" type="button" (click)="loadStaff()">
+        Tentar de novo
+      </button>
+    }
+    @default {
+      @if (staff().length === 0) {
+        <p class="empty">Ninguém tem o perfil de funcionário ainda.</p>
+      } @else {
+        <ul class="accounts">
+          @for (account of staff(); track account.id) {
+            <li class="account">
+              <div class="account__row">
+                <span class="account__email">{{ account.email }}</span>
+                @if (!isPending(account)) {
+                  <button class="button--link" type="button" (click)="open(account, 'STUDENT')">
+                    Retirar perfil
+                  </button>
+                }
+              </div>
+              <ng-container *ngTemplateOutlet="changePanel; context: { $implicit: account }" />
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
+</section>
+
+<section class="section" aria-labelledby="add-title">
+  <h2 id="add-title">Dar o perfil de funcionário</h2>
+  <p class="muted">A pessoa precisa ter entrado no Cadê? uma vez com o e-mail da UCSal.</p>
+  <form class="search" (submit)="$event.preventDefault(); search()" novalidate>
+    <label class="visually-hidden" for="email">E-mail da pessoa</label>
+    <input
+      id="email"
+      class="input"
+      type="search"
+      inputmode="email"
+      autocomplete="off"
+      placeholder="Ex.: maria.souza"
+      [formControl]="email"
+      [attr.aria-invalid]="searchError() ? true : null"
+      [attr.aria-describedby]="searchError() ? 'email-error' : null"
+    />
+    <button class="button button--secondary" type="submit" [disabled]="searching()">
+      {{ searching() ? 'Buscando…' : 'Buscar' }}
+    </button>
+  </form>
+  @if (searchError(); as message) {
+    <p id="email-error" class="field__error">{{ message }}</p>
+  }
+
+  @if (results(); as list) {
+    @if (list.length === 0) {
+      <p class="empty">
+        Nenhuma conta com esse e-mail. Peça para a pessoa entrar uma vez no Cadê? e busque de novo.
+      </p>
+    } @else {
+      <ul class="accounts">
+        @for (account of list; track account.id) {
+          <li class="account">
+            <div class="account__row">
+              <span>
+                <span class="account__email">{{ account.email }}</span>
+                <span
+                  class="tag"
+                  [class.tag--info]="account.role === 'STAFF'"
+                  [class.tag--neutral]="account.role !== 'STAFF'"
+                >
+                  {{ roleLabels[account.role] }}
+                </span>
+              </span>
+              @if (account.role === 'STUDENT' && !isPending(account)) {
+                <button
+                  class="button button--secondary"
+                  type="button"
+                  (click)="open(account, 'STAFF')"
+                >
+                  Tornar funcionário
+                </button>
+              }
+            </div>
+            <ng-container *ngTemplateOutlet="changePanel; context: { $implicit: account }" />
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

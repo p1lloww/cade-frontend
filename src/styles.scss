@@ -463,6 +463,16 @@ a:hover {
   background: linear-gradient(180deg, #ffffff 0%, #e3f0f8 50%, #cfe3ef 100%);
 }
 
+// Gel vermelho: só para confirmar o que tira algo de alguém (recusa no balcão, retirada de perfil).
+.button--danger {
+  border-color: #7d1714;
+  background: linear-gradient(180deg, #d0504b 0%, #b52a25 45%, #a3201c 60%, #8f1c18 100%);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #c0443f 0%, #a3201c 45%, #8f1c18 60%, #7d1714 100%);
+}
+
 .button--link {
   min-height: var(--touch-target);
   padding: 0;

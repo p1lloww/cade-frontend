@@ -100,15 +100,6 @@ h2 {
   margin: 0;
 }
 
-.button--danger {
-  border-color: #7d1714;
-  background: linear-gradient(180deg, #d0504b 0%, #b52a25 45%, #a3201c 60%, #8f1c18 100%);
-}
-
-.button--danger:hover:not(:disabled) {
-  background: linear-gradient(180deg, #c0443f 0%, #a3201c 45%, #8f1c18 60%, #7d1714 100%);
-}
-
 .result {
   padding: var(--space-5) var(--space-4);
   border-radius: var(--radius-lg);
