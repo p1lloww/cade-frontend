@@ -1,0 +1,175 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: 600;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.top h1 {
+  margin: 0;
+}
+
+.updated {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+// Números de destaque: o número é a informação, sem gráfico.
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+
+.tile__label {
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.tile__value {
+  color: var(--color-heading);
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.tile__unit {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.tile__none {
+  color: var(--color-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.tile__link {
+  font-weight: 700;
+}
+
+.section {
+  margin-top: var(--space-6);
+}
+
+.section h2 {
+  font-size: 1.25rem;
+}
+
+// Uma série só, numa cor só; o número vem escrito ao lado de cada barra.
+.bars {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bar__label {
+  color: var(--color-heading);
+  font-weight: 600;
+}
+
+.bar__track {
+  height: 1rem;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--color-primary);
+}
+
+.bar__value {
+  color: var(--color-heading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead th {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.table tbody th {
+  color: var(--color-heading);
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.num {
+  text-align: right !important;
+}
+
+.zero {
+  color: var(--color-muted);
+}
+
+.strong {
+  color: var(--color-heading);
+  font-weight: 700;
+}
+
+.tile__short {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
