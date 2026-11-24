@@ -56,10 +56,15 @@ describe('MyLossReportsPage', () => {
 
   afterEach(() => http.verify());
 
-  async function respond(reports: LossReport[], summons: unknown[] = []): Promise<void> {
+  async function respond(
+    reports: LossReport[],
+    summons: unknown[] = [],
+    pickups: unknown[] = [],
+  ): Promise<void> {
     await fixture.whenStable();
     http.expectOne('/api/loss-reports/mine').flush(reports);
     http.expectOne('/api/summons/mine').flush(summons);
+    http.expectOne('/api/pickups/mine').flush(pickups);
     await fixture.whenStable();
   }
 
@@ -126,6 +131,7 @@ describe('MyLossReportsPage', () => {
       .flush({ detail: 'O sistema está fora do ar.' }, { status: 503, statusText: 'Unavailable' });
     // Com uma das chamadas falhando, a outra é cancelada: a tela não fica pela metade.
     expect(http.expectOne('/api/summons/mine').cancelled).toBe(true);
+    expect(http.expectOne('/api/pickups/mine').cancelled).toBe(true);
     await fixture.whenStable();
     expect(page.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
       'O sistema está fora do ar.',
@@ -134,5 +140,51 @@ describe('MyLossReportsPage', () => {
     page.querySelector<HTMLButtonElement>('button')!.click();
     await respond([report('r-open', 'OPEN')]);
     expect(titles('ongoing-title')).toEqual(['Registro r-open']);
+  });
+
+  it('pede para confirmar a retirada feita no balcão e confirma', async () => {
+    await respond(
+      [report('r-done', 'COMPLETED')],
+      [],
+      [
+        {
+          pickupId: 'p1',
+          handedOverAt: '2026-11-24T13:35:00Z',
+          confirmed: false,
+          confirmedAt: null,
+        },
+        {
+          pickupId: 'p0',
+          handedOverAt: '2026-11-01T13:35:00Z',
+          confirmed: true,
+          confirmedAt: '2026-11-01T13:40:00Z',
+        },
+      ],
+    );
+    expect(page.querySelectorAll('.confirm')).toHaveLength(1);
+
+    page.querySelector<HTMLButtonElement>('.confirm button')!.click();
+    await fixture.whenStable();
+    http.expectOne({ method: 'POST', url: '/api/pickups/p1/confirmation' }).flush({
+      pickupId: 'p1',
+      handedOverAt: '2026-11-24T13:35:00Z',
+      confirmed: true,
+      confirmedAt: '2026-11-24T13:36:00Z',
+    });
+    await fixture.whenStable();
+
+    expect(page.querySelector('.confirm')).toBeNull();
+    expect(page.textContent).toContain('Retirada confirmada');
+  });
+
+  it('mostra os registros mesmo sem conseguir ler as retiradas', async () => {
+    await fixture.whenStable();
+    http.expectOne('/api/loss-reports/mine').flush([report('r-open', 'OPEN')]);
+    http.expectOne('/api/summons/mine').flush([]);
+    http.expectOne('/api/pickups/mine').flush(null, { status: 500, statusText: 'Error' });
+    await fixture.whenStable();
+
+    expect(titles('ongoing-title')).toEqual(['Registro r-open']);
+    expect(page.querySelector('.confirm')).toBeNull();
   });
 });

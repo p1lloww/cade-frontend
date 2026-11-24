@@ -1,11 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { ApiError } from '../../../../core/api/api-error';
 import { ErrorMessage } from '../../../../shared/error-message/error-message';
-import { formatDate, formatPeriod } from '../../../../shared/format/dates';
-import { LossReport, LossReportStatus, ONGOING_STATUSES, StudentSummons } from '../loss-report';
+import { formatDate, formatDateTime, formatPeriod } from '../../../../shared/format/dates';
+import {
+  LossReport,
+  LossReportStatus,
+  ONGOING_STATUSES,
+  StudentPickup,
+  StudentSummons,
+} from '../loss-report';
 import { LossReportApi } from '../loss-report-api';
 
 /** Máximo de registros em andamento por estudante (RN05); a regra é do back-end, aqui só se informa. */
@@ -45,6 +51,13 @@ export default class MyLossReportsPage {
   protected readonly maxOngoing = MAX_ONGOING;
   protected readonly formatDate = formatDate;
   protected readonly formatPeriod = formatPeriod;
+  protected readonly formatDateTime = formatDateTime;
+
+  /** Retiradas que o estudante ainda não confirmou (RF30). */
+  protected readonly toConfirm = signal<StudentPickup[]>([]);
+  protected readonly confirming = signal<string | null>(null);
+  protected readonly confirmError = signal<ApiError | null>(null);
+  protected readonly confirmedNotice = signal(false);
 
   protected readonly state = signal<'loading' | 'ready' | 'error'>('loading');
   protected readonly error = signal<ApiError | null>(null);
@@ -69,8 +82,14 @@ export default class MyLossReportsPage {
   protected load(): void {
     this.state.set('loading');
     this.error.set(null);
-    forkJoin([this.lossReportApi.mine(), this.lossReportApi.mySummons()]).subscribe({
-      next: ([reports, summons]) => {
+    forkJoin([
+      this.lossReportApi.mine(),
+      this.lossReportApi.mySummons(),
+      // Sem as retiradas, a lista ainda serve: o aviso de confirmar só não aparece.
+      this.lossReportApi.myPickups().pipe(catchError(() => of([] as StudentPickup[]))),
+    ]).subscribe({
+      next: ([reports, summons, pickups]) => {
+        this.toConfirm.set(pickups.filter(({ confirmed }) => !confirmed));
         const byReport = new Map(summons.map((s) => [s.lossReportId, s]));
         this.items.set(
           reports.map((report) => ({
@@ -85,6 +104,26 @@ export default class MyLossReportsPage {
         this.state.set('error');
       },
     });
+  }
+
+  protected confirmPickup(pickup: StudentPickup): void {
+    if (this.confirming()) {
+      return;
+    }
+    this.confirming.set(pickup.pickupId);
+    this.confirmError.set(null);
+    this.lossReportApi
+      .confirmPickup(pickup.pickupId)
+      .pipe(finalize(() => this.confirming.set(null)))
+      .subscribe({
+        next: () => {
+          this.toConfirm.update((list) =>
+            list.filter(({ pickupId }) => pickupId !== pickup.pickupId),
+          );
+          this.confirmedNotice.set(true);
+        },
+        error: (error: ApiError) => this.confirmError.set(error),
+      });
   }
 
   protected isOngoing(status: LossReportStatus): boolean {

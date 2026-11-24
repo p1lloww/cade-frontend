@@ -69,3 +69,12 @@ export interface StudentSummons {
   hours: string;
   whatToBring: string;
 }
+
+/** Retirada registrada no balcão para o estudante (GET /pickups/mine). Nada do objeto (RN03). */
+export interface StudentPickup {
+  pickupId: string;
+  handedOverAt: string;
+  /** Se o estudante já confirmou no celular, no lugar da assinatura no papel (RF30). */
+  confirmed: boolean;
+  confirmedAt: string | null;
+}

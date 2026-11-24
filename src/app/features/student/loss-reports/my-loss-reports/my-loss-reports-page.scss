@@ -152,3 +152,17 @@
   min-height: var(--touch-target);
   font-weight: 700;
 }
+
+// Retirada a confirmar: vem antes de tudo, porque é o que o estudante faz ainda no balcão.
+.confirm {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border: 2px solid var(--color-success);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-bg);
+}
+
+.confirm h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.25rem;
+}

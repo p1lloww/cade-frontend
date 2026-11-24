@@ -6,6 +6,29 @@
   }
 </div>
 
+@for (pickup of toConfirm(); track pickup.pickupId) {
+  <section class="confirm" aria-labelledby="confirm-{{ pickup.pickupId }}">
+    <h2 id="confirm-{{ pickup.pickupId }}">Confirme que você retirou</h2>
+    <p>
+      O balcão registrou a entrega de um objeto para você em
+      {{ formatDateTime(pickup.handedOverAt) }}. Se foi você mesmo quem retirou, confirme aqui. É a
+      sua assinatura.
+    </p>
+    <app-error-message [error]="confirmError()" />
+    <button
+      class="button"
+      type="button"
+      (click)="confirmPickup(pickup)"
+      [disabled]="confirming() !== null"
+    >
+      {{ confirming() === pickup.pickupId ? 'Confirmando…' : 'Confirmar retirada' }}
+    </button>
+  </section>
+}
+@if (confirmedNotice()) {
+  <p class="alert alert--success" role="status">Retirada confirmada. Obrigado!</p>
+}
+
 @switch (state()) {
   @case ('loading') {
     <p class="muted" role="status">Carregando os seus registros…</p>
