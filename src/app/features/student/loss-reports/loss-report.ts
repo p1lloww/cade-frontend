@@ -38,11 +38,31 @@ export interface LossReport {
   locationsLabel: string;
   lostFrom: string;
   lostUntil: string | null;
+  shift: Shift | null;
   shiftLabel: string;
-  status: string;
+  status: LossReportStatus;
   statusLabel: string;
   statusDescription: string;
   registeredAt: string;
   expiresAt: string;
   version: number;
+  /** O que o funcionário pediu para saber; nulo se nunca houve pedido. */
+  infoRequestReason: string | null;
+}
+
+export type LossReportStatus =
+  'OPEN' | 'AWAITING_INFO' | 'SUMMONED' | 'COMPLETED' | 'EXPIRED' | 'CANCELLED' | 'REFUSED';
+
+/** Situações em que o registro ainda conta para o limite de 5 (RN05). */
+export const ONGOING_STATUSES: readonly LossReportStatus[] = ['OPEN', 'AWAITING_INFO', 'SUMMONED'];
+
+/** Convocação ativa do estudante (GET /summons/mine): onde, até quando e o que levar. Nada do objeto (RN03). */
+export interface StudentSummons {
+  id: string;
+  lossReportId: string;
+  summonedAt: string;
+  expiresAt: string;
+  place: string;
+  hours: string;
+  whatToBring: string;
 }

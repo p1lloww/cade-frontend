@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiError } from '../../../../core/api/api-error';
 import { ErrorMessage } from '../../../../shared/error-message/error-message';
+import { formatDate } from '../../../../shared/format/dates';
 import { Category, LossReport, LossReportRequest, Shift, SHIFT_LABELS } from '../loss-report';
 import { LossReportApi } from '../loss-report-api';
 
@@ -164,9 +165,7 @@ export default class NewLossReportPage {
     return `${cssId(field)}-error`;
   }
 
-  protected formatDate(value: string): string {
-    return new Date(value).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
-  }
+  protected readonly formatDate = formatDate;
 
   private request(): LossReportRequest {
     const value = this.form.getRawValue();

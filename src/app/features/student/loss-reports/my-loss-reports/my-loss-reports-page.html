@@ -1,0 +1,112 @@
+<div class="top">
+  <h1>Meus registros</h1>
+  <!-- Sem nenhum registro, o convite fica só no quadro vazio, para não repetir o botão. -->
+  @if (state() !== 'ready' || !isEmpty()) {
+    <a class="button" routerLink="/student/losses/new">Registrar perda</a>
+  }
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando os seus registros…</p>
+  }
+  @case ('error') {
+    <app-error-message [error]="error()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (isEmpty()) {
+      <section class="empty">
+        <h2>Nenhum registro ainda</h2>
+        <p class="muted">
+          Perdeu alguma coisa na UCSal? Registre aqui. Se o objeto aparecer no Achados e Perdidos,
+          você é avisado por e-mail.
+        </p>
+        <a class="button button--large" routerLink="/student/losses/new">Registrar perda</a>
+      </section>
+    } @else {
+      <section aria-labelledby="ongoing-title">
+        <div class="section-head">
+          <h2 id="ongoing-title">Em andamento</h2>
+          <span class="muted">{{ ongoing().length }} de {{ maxOngoing }}</span>
+        </div>
+
+        @if (ongoing().length === 0) {
+          <p class="muted">Nenhum registro em andamento.</p>
+        } @else {
+          <ul class="reports">
+            @for (item of ongoing(); track item.report.id) {
+              <li>
+                <ng-container *ngTemplateOutlet="card; context: { $implicit: item }" />
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      @if (closed().length > 0) {
+        <section class="closed" aria-labelledby="closed-title">
+          <div class="section-head">
+            <h2 id="closed-title">Encerrados</h2>
+          </div>
+          <ul class="reports">
+            @for (item of closed(); track item.report.id) {
+              <li>
+                <ng-container *ngTemplateOutlet="card; context: { $implicit: item }" />
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+}
+
+<ng-template #card let-item>
+  <article class="report" [class.report--summoned]="item.summons">
+    <div class="report__head">
+      <div class="report__title">
+        <span class="report__category">{{ item.report.categoryName }}</span>
+        <h3>{{ item.report.description }}</h3>
+      </div>
+      <span class="tag" [class]="tagClass(item.report.status)">{{ item.report.statusLabel }}</span>
+    </div>
+
+    <p class="report__status">{{ item.report.statusDescription }}</p>
+
+    @if (item.summons; as summons) {
+      <div class="pickup">
+        <p class="pickup__deadline">Busque no balcão até {{ formatDate(summons.expiresAt) }}.</p>
+        <dl class="pickup__info">
+          <div>
+            <dt>Onde</dt>
+            <dd>{{ summons.place }}</dd>
+          </div>
+          <div>
+            <dt>Horário</dt>
+            <dd>{{ summons.hours }}</dd>
+          </div>
+          <div>
+            <dt>O que levar</dt>
+            <dd>{{ summons.whatToBring }}</dd>
+          </div>
+        </dl>
+      </div>
+    }
+
+    @if (item.report.status === 'AWAITING_INFO' && item.report.infoRequestReason) {
+      <p class="question"><strong>A sala perguntou:</strong> {{ item.report.infoRequestReason }}</p>
+    }
+
+    <p class="report__meta">
+      {{ item.report.locationsLabel }} ·
+      {{ formatPeriod(item.report.lostFrom, item.report.lostUntil) }}
+      @if (item.report.shift) {
+        · {{ item.report.shiftLabel }}
+      }
+    </p>
+    @if (item.report.status === 'OPEN' || item.report.status === 'AWAITING_INFO') {
+      <p class="report__meta">Fica aberto até {{ formatDate(item.report.expiresAt) }}.</p>
+    }
+  </article>
+</ng-template>
