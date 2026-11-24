@@ -38,3 +38,13 @@ export function recentDays(): { today: string; yesterday: string } {
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
   return { today: isoDate(now), yesterday: isoDate(yesterday) };
 }
+
+/** Instante da API com dia e hora, ex.: "24 de nov., 10:35". */
+export function formatDateTime(value: string): string {
+  return new Date(value).toLocaleString('pt-BR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

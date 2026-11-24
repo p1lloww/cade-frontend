@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from '../../../core/api/api-client';
-import { LossReport, LossReportRequest, StudentSummons } from './loss-report';
+import { LossReport, LossReportRequest, StudentPickup, StudentSummons } from './loss-report';
 
 /** Chamadas da API para os registros de perda do estudante. */
 @Injectable({ providedIn: 'root' })
@@ -16,6 +16,16 @@ export class LossReportApi {
   /** Convocações ativas do estudante logado, para saber onde e até quando retirar. */
   mySummons(): Observable<StudentSummons[]> {
     return this.api.get<StudentSummons[]>('/summons/mine');
+  }
+
+  /** Retiradas registradas no balcão para o estudante, as mais recentes primeiro. */
+  myPickups(): Observable<StudentPickup[]> {
+    return this.api.get<StudentPickup[]>('/pickups/mine');
+  }
+
+  /** O estudante confirma a retirada no próprio celular (RF30). */
+  confirmPickup(pickupId: string): Observable<StudentPickup> {
+    return this.api.post<StudentPickup>(`/pickups/${pickupId}/confirmation`);
   }
 
   cancel(id: string): Observable<LossReport> {
