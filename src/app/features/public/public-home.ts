@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
 })
 export default class PublicHome {
   protected readonly registerLossUrl = '/student/losses/new';
-  // Enquanto a tela de "Meus registros" (PER-04) não existe, leva à área do estudante.
+  // "Meus registros" é a página inicial da área do estudante.
   protected readonly myLossesUrl = '/student';
 
   protected readonly steps = [

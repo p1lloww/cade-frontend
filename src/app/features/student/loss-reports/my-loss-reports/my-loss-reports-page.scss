@@ -1,0 +1,134 @@
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.top h1 {
+  margin: 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.closed {
+  margin-top: var(--space-6);
+}
+
+.reports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.report p {
+  margin: 0;
+}
+
+// O convocado tem prazo: ganha a moldura laranja e vai para o topo da lista.
+.report--summoned {
+  border: 2px solid var(--color-orange);
+  background: #fffaf0;
+}
+
+.report__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.report__title {
+  min-width: 0;
+}
+
+.report__category {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.report h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.report__status {
+  color: var(--color-text);
+}
+
+.report__meta {
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+.pickup {
+  margin: var(--space-1) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-orange-soft);
+}
+
+.pickup__deadline {
+  color: var(--color-heading);
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
+.pickup__info {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+}
+
+.pickup__info dt {
+  color: var(--color-orange-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.pickup__info dd {
+  margin: 0;
+  color: var(--color-heading);
+}
+
+.question {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-orange-soft);
+  color: var(--color-orange-text);
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}

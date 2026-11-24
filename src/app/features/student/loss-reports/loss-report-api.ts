@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from '../../../core/api/api-client';
-import { Category, LossReport, LossReportRequest } from './loss-report';
+import { Category, LossReport, LossReportRequest, StudentSummons } from './loss-report';
 
 /** Chamadas da API para os registros de perda do estudante. */
 @Injectable({ providedIn: 'root' })
@@ -10,6 +10,16 @@ export class LossReportApi {
 
   categories(): Observable<Category[]> {
     return this.api.get<Category[]>('/categories');
+  }
+
+  /** Registros do estudante logado, do mais recente para o mais antigo (RF16). */
+  mine(): Observable<LossReport[]> {
+    return this.api.get<LossReport[]>('/loss-reports/mine');
+  }
+
+  /** Convocações ativas do estudante logado, para saber onde e até quando retirar. */
+  mySummons(): Observable<StudentSummons[]> {
+    return this.api.get<StudentSummons[]>('/summons/mine');
   }
 
   /**
