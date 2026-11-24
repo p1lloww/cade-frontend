@@ -27,6 +27,12 @@
       </dl>
     </div>
     <p class="muted">Ele já está sendo comparado com os registros de perda abertos.</p>
+    @if (identifyError(); as message) {
+      <p class="alert alert--error" role="alert">
+        O objeto foi cadastrado, mas não deu para marcar quem é o dono: {{ message }} Tente de novo
+        em "Editar".
+      </p>
+    }
     <div class="done__actions">
       <button class="button button--large" type="button" (click)="registerAnother()">
         Cadastrar outro
@@ -278,6 +284,62 @@
           <span id="reservedDetails-error" class="field__error">{{ message }}</span>
         }
       </div>
+
+      <div class="field">
+        <label class="field__label" for="broughtBy">Quem trouxe</label>
+        <input
+          id="broughtBy"
+          class="input"
+          type="text"
+          maxlength="120"
+          autocomplete="off"
+          placeholder="Ex.: equipe de limpeza"
+          formControlName="broughtBy"
+          [attr.aria-invalid]="fieldError('broughtBy') ? true : null"
+        />
+      </div>
+
+      <fieldset class="identified">
+        <legend class="field__label">Achou o nome do dono no objeto?</legend>
+        <p class="field__hint">
+          Um nome, e-mail ou documento dentro do objeto. Preencha o que achou.
+        </p>
+        <div class="pair">
+          <div class="field">
+            <label class="field__label" for="identifiedName">Nome</label>
+            <input
+              id="identifiedName"
+              class="input"
+              type="text"
+              maxlength="120"
+              autocomplete="off"
+              formControlName="identifiedName"
+            />
+          </div>
+          <div class="field">
+            <label class="field__label" for="identifiedEmail">E-mail</label>
+            <input
+              id="identifiedEmail"
+              class="input"
+              type="email"
+              maxlength="254"
+              autocomplete="off"
+              formControlName="identifiedEmail"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="identifiedDocument">Documento</label>
+          <input
+            id="identifiedDocument"
+            class="input"
+            type="text"
+            maxlength="60"
+            autocomplete="off"
+            formControlName="identifiedDocument"
+          />
+        </div>
+      </fieldset>
 
       @if (defaultRiskLabel(); as label) {
         <div class="field">

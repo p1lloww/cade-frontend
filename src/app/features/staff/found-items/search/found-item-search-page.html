@@ -134,6 +134,7 @@
               <span class="muted">{{ item.storageBox }}</span>
               <span class="result__links">
                 <a [routerLink]="['/staff/items', item.id, 'suggestions']">Ver sugestões</a>
+                <a [routerLink]="['/staff/items', item.id, 'edit']">Editar</a>
                 @if (canHandOver(item)) {
                   <a [routerLink]="['/staff/items', item.id, 'walk-in']">Entregar sem registro</a>
                 }

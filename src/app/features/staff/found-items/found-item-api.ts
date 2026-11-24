@@ -6,6 +6,8 @@ import {
   FoundItemFilters,
   FoundItemPage,
   FoundItemRequest,
+  FoundItemUpdate,
+  Identification,
   PlaceOption,
   SearchOptions,
 } from './found-item';
@@ -28,6 +30,7 @@ export class FoundItemApi {
       risk: item.risk,
       internalDescription: item.internalDescription,
       reservedDetails: item.reservedDetails,
+      broughtBy: item.broughtBy,
     };
     for (const [field, value] of Object.entries(optional)) {
       if (value) {
@@ -39,6 +42,25 @@ export class FoundItemApi {
 
   find(id: string): Observable<FoundItem> {
     return this.api.get<FoundItem>(`/found-items/${id}`);
+  }
+
+  /** Corrige os dados (RF11): só Disponível ou Não reclamado, e recusa com 409 se a versão estiver velha. */
+  update(id: string, update: FoundItemUpdate): Observable<FoundItem> {
+    return this.api.put<FoundItem>(`/found-items/${id}`, update);
+  }
+
+  /** Quem trouxe o objeto (RF07); vazio apaga. */
+  recordBroughtBy(id: string, broughtBy: string | null): Observable<FoundItem> {
+    return this.api.put<FoundItem>(`/found-items/${id}/brought-by`, { broughtBy });
+  }
+
+  /** Marca o objeto como identificado (RF08); marcar de novo troca o que estava. */
+  identify(id: string, identification: Identification): Observable<FoundItem> {
+    return this.api.put<FoundItem>(`/found-items/${id}/identification`, identification);
+  }
+
+  clearIdentification(id: string): Observable<FoundItem> {
+    return this.api.delete<FoundItem>(`/found-items/${id}/identification`);
   }
 
   /**

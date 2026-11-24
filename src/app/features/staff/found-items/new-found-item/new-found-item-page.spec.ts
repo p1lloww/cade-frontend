@@ -222,4 +222,39 @@ describe('NewFoundItemPage', () => {
     expect(page.querySelector('.photo__pick')).not.toBeNull();
     expect(page.querySelector<HTMLInputElement>('input[name="categoryId"]:checked')).toBeNull();
   });
+
+  it('envia quem trouxe e marca o dono identificado logo depois do cadastro', async () => {
+    await fillRequired();
+    await type('#broughtBy', 'Equipe de limpeza');
+    await type('#identifiedName', 'Maria Souza');
+    await submit();
+
+    const register = http.expectOne('/api/found-items');
+    expect((register.request.body as FormData).get('broughtBy')).toBe('Equipe de limpeza');
+    register.flush(REGISTERED, { status: 201, statusText: 'Created' });
+    await fixture.whenStable();
+    const identify = http.expectOne({ method: 'PUT', url: '/api/found-items/i1/identification' });
+    expect(identify.request.body).toEqual({ name: 'Maria Souza', email: null, document: null });
+    identify.flush({ ...REGISTERED, identified: true });
+    await fixture.whenStable();
+
+    expect(page.querySelector('h1')?.textContent).toBe('Objeto cadastrado');
+  });
+
+  it('avisa quando o cadastro deu certo mas marcar o dono falhou', async () => {
+    await fillRequired();
+    await type('#identifiedEmail', 'maria@ucsal.edu.br');
+    await submit();
+    http.expectOne('/api/found-items').flush(REGISTERED, { status: 201, statusText: 'Created' });
+    await fixture.whenStable();
+    http
+      .expectOne('/api/found-items/i1/identification')
+      .flush({ detail: 'Informe um e-mail válido.' }, { status: 400, statusText: 'Bad Request' });
+    await fixture.whenStable();
+
+    expect(page.querySelector('h1')?.textContent).toBe('Objeto cadastrado');
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain(
+      'não deu para marcar quem é o dono',
+    );
+  });
 });

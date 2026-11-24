@@ -1,0 +1,284 @@
+<a class="back" [routerLink]="['/staff/items', id(), 'suggestions']">Voltar ao objeto</a>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando o objeto…</p>
+  }
+  @case ('error') {
+    <h1>Editar objeto</h1>
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (item(); as item) {
+      <div class="item">
+        <app-api-photo
+          class="item__photo"
+          [path]="item.photoPath"
+          [alt]="'Foto do objeto: ' + item.categoryName"
+        />
+        <div>
+          <h1>Editar objeto</h1>
+          <p class="muted">
+            {{ item.internalDescription || item.categoryName }}
+            <span class="tag" [class]="statusTag[item.status]">{{ item.statusLabel }}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Corrigir dados -->
+      <section class="group" aria-labelledby="data-title">
+        <h2 id="data-title" class="section-title">Corrigir dados</h2>
+        @if (canCorrect()) {
+          <form [formGroup]="data" (ngSubmit)="saveData()" novalidate>
+            <div class="pair">
+              <div class="field">
+                <label class="field__label" for="categoryId">Categoria</label>
+                <select id="categoryId" class="input" formControlName="categoryId">
+                  @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="risk">Risco</label>
+                <select id="risk" class="input" formControlName="risk">
+                  @for (option of riskOptions(); track option.level) {
+                    <option [value]="option.level">{{ option.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="block">Bloco</label>
+                <input
+                  id="block"
+                  class="input"
+                  type="text"
+                  maxlength="30"
+                  formControlName="block"
+                  [attr.aria-invalid]="fieldErrors()['block'] ? true : null"
+                  [attr.aria-describedby]="fieldErrors()['block'] ? 'block-error' : null"
+                />
+                @if (fieldErrors()['block']; as message) {
+                  <span id="block-error" class="field__error">{{ message }}</span>
+                }
+              </div>
+              <div class="field">
+                <label class="field__label" for="room">Sala ou lugar</label>
+                <input
+                  id="room"
+                  class="input"
+                  type="text"
+                  maxlength="30"
+                  formControlName="room"
+                  [attr.aria-invalid]="fieldErrors()['room'] ? true : null"
+                  [attr.aria-describedby]="fieldErrors()['room'] ? 'room-error' : null"
+                />
+                @if (fieldErrors()['room']; as message) {
+                  <span id="room-error" class="field__error">{{ message }}</span>
+                }
+              </div>
+              <div class="field">
+                <label class="field__label" for="foundOn">Achado em</label>
+                <input
+                  id="foundOn"
+                  class="input"
+                  type="date"
+                  [max]="today"
+                  formControlName="foundOn"
+                  [attr.aria-invalid]="fieldErrors()['foundOn'] ? true : null"
+                  [attr.aria-describedby]="fieldErrors()['foundOn'] ? 'foundOn-error' : null"
+                />
+                @if (fieldErrors()['foundOn']; as message) {
+                  <span id="foundOn-error" class="field__error">{{ message }}</span>
+                }
+              </div>
+              <div class="field">
+                <label class="field__label" for="storageBox">Caixa</label>
+                <input
+                  id="storageBox"
+                  class="input"
+                  type="text"
+                  maxlength="40"
+                  formControlName="storageBox"
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="internalDescription">Descrição interna</label>
+              <textarea
+                id="internalDescription"
+                class="input input--area"
+                rows="2"
+                maxlength="500"
+                formControlName="internalDescription"
+              ></textarea>
+            </div>
+            <div class="field">
+              <label class="field__label" for="reservedDetails">Detalhes reservados</label>
+              <textarea
+                id="reservedDetails"
+                class="input input--area"
+                rows="2"
+                maxlength="500"
+                formControlName="reservedDetails"
+              ></textarea>
+            </div>
+            <div class="field">
+              <label class="field__label" for="reason">Motivo da correção</label>
+              <span id="reason-hint" class="field__hint">Fica no histórico, com o que mudou.</span>
+              <input
+                id="reason"
+                class="input"
+                type="text"
+                maxlength="300"
+                placeholder="Ex.: local anotado errado na etiqueta"
+                formControlName="reason"
+                [attr.aria-invalid]="fieldErrors()['reason'] ? true : null"
+                [attr.aria-describedby]="
+                  fieldErrors()['reason'] ? 'reason-hint reason-error' : 'reason-hint'
+                "
+              />
+              @if (fieldErrors()['reason']; as message) {
+                <span id="reason-error" class="field__error">{{ message }}</span>
+              }
+            </div>
+            <app-error-message [error]="errors().data" />
+            @if (notices().data; as text) {
+              <p class="alert alert--success" role="status">{{ text }}</p>
+            }
+            <button class="button" type="submit" [disabled]="busy() !== null">
+              {{ busy() === 'data' ? 'Salvando…' : 'Salvar correção' }}
+            </button>
+          </form>
+        } @else {
+          <p class="alert alert--info">
+            Só dá para corrigir os dados de objeto disponível ou não reclamado. Este está
+            {{ item.statusLabel.toLowerCase() }}.
+          </p>
+        }
+      </section>
+
+      <!-- Quem trouxe -->
+      <section class="group" aria-labelledby="brought-title">
+        <h2 id="brought-title" class="section-title">Quem trouxe</h2>
+        <div class="field">
+          <label class="field__label" for="broughtBy">Nome e matrícula, ou equipe de limpeza</label>
+          <span id="broughtBy-hint" class="field__hint"
+            >Só funcionários veem. Deixe vazio para apagar.</span
+          >
+          <input
+            id="broughtBy"
+            class="input"
+            type="text"
+            maxlength="120"
+            autocomplete="off"
+            [formControl]="broughtBy"
+            aria-describedby="broughtBy-hint"
+          />
+        </div>
+        <app-error-message [error]="errors().broughtBy" />
+        @if (notices().broughtBy; as text) {
+          <p class="alert alert--success" role="status">{{ text }}</p>
+        }
+        <button
+          class="button button--secondary"
+          type="button"
+          (click)="saveBroughtBy()"
+          [disabled]="busy() !== null"
+        >
+          {{ busy() === 'broughtBy' ? 'Salvando…' : 'Salvar quem trouxe' }}
+        </button>
+      </section>
+
+      <!-- Identificado -->
+      <section class="group" aria-labelledby="identified-title">
+        <h2 id="identified-title" class="section-title">Dono identificado</h2>
+        @if (canIdentify()) {
+          <p class="muted">
+            @if (item.identified) {
+              O objeto está marcado como identificado.
+            } @else {
+              Achou um nome, e-mail ou documento no objeto? Preencha o que achou.
+            }
+          </p>
+          <div class="pair" [formGroup]="identification">
+            <div class="field">
+              <label class="field__label" for="identifiedName">Nome</label>
+              <input
+                id="identifiedName"
+                class="input"
+                type="text"
+                maxlength="120"
+                autocomplete="off"
+                formControlName="name"
+              />
+            </div>
+            <div class="field">
+              <label class="field__label" for="identifiedEmail">E-mail</label>
+              <input
+                id="identifiedEmail"
+                class="input"
+                type="email"
+                maxlength="254"
+                autocomplete="off"
+                formControlName="email"
+                [attr.aria-invalid]="fieldErrors()['email'] ? true : null"
+                [attr.aria-describedby]="fieldErrors()['email'] ? 'email-error' : null"
+              />
+              @if (fieldErrors()['email']; as message) {
+                <span id="email-error" class="field__error">{{ message }}</span>
+              }
+            </div>
+            <div class="field">
+              <label class="field__label" for="identifiedDocument">Documento</label>
+              <input
+                id="identifiedDocument"
+                class="input"
+                type="text"
+                maxlength="60"
+                autocomplete="off"
+                formControlName="document"
+              />
+            </div>
+          </div>
+          @if (fieldErrors()['identification']; as message) {
+            <p class="field__error">{{ message }}</p>
+          }
+          <app-error-message [error]="errors().identification" />
+          @if (notices().identification; as text) {
+            <p class="alert alert--success" role="status">{{ text }}</p>
+          }
+          <div class="actions">
+            <button
+              class="button button--secondary"
+              type="button"
+              (click)="saveIdentification()"
+              [disabled]="busy() !== null"
+            >
+              {{
+                busy() === 'identification'
+                  ? 'Salvando…'
+                  : item.identified
+                    ? 'Salvar mudanças'
+                    : 'Marcar como identificado'
+              }}
+            </button>
+            @if (item.identified) {
+              <button
+                class="button--link"
+                type="button"
+                (click)="clearIdentification()"
+                [disabled]="busy() !== null"
+              >
+                {{ busy() === 'clear' ? 'Desmarcando…' : 'Desmarcar' }}
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="alert alert--info">O objeto já saiu da sala.</p>
+        }
+      </section>
+    }
+  }
+}

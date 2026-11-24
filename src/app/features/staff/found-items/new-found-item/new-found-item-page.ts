@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 import { ApiError } from '../../../../core/api/api-error';
 import {
   Category,
@@ -60,6 +60,10 @@ export default class NewFoundItemPage {
     risk: new FormControl<RiskLevel | ''>('', { nonNullable: true }),
     internalDescription: new FormControl('', { nonNullable: true }),
     reservedDetails: new FormControl('', { nonNullable: true }),
+    broughtBy: new FormControl('', { nonNullable: true }),
+    identifiedName: new FormControl('', { nonNullable: true }),
+    identifiedEmail: new FormControl('', { nonNullable: true }),
+    identifiedDocument: new FormControl('', { nonNullable: true }),
   });
 
   protected readonly categories = signal<Category[]>([]);
@@ -73,6 +77,8 @@ export default class NewFoundItemPage {
   /** Mensagem de cada campo, pelo nome do campo enviado à API. */
   protected readonly fieldErrors = signal<Readonly<Record<string, string>>>({});
   protected readonly registered = signal<FoundItem | null>(null);
+  /** O objeto foi cadastrado, mas marcar como identificado falhou: dá para tentar de novo na edição. */
+  protected readonly identifyError = signal<string | null>(null);
   private attempted = false;
   /** A pessoa mexeu na caixa: a sugestão pela data não a sobrescreve mais. */
   private storageBoxEdited = false;
@@ -179,8 +185,28 @@ export default class NewFoundItemPage {
         risk: value.risk || null,
         internalDescription: value.internalDescription.trim() || null,
         reservedDetails: value.reservedDetails.trim() || null,
+        broughtBy: value.broughtBy.trim() || null,
       })
-      .pipe(finalize(() => this.submitting.set(false)))
+      .pipe(
+        // O que identifica o dono vai numa chamada própria, logo depois do cadastro (RF08).
+        switchMap((item) => {
+          const identification = {
+            name: value.identifiedName.trim() || null,
+            email: value.identifiedEmail.trim() || null,
+            document: value.identifiedDocument.trim() || null,
+          };
+          if (!identification.name && !identification.email && !identification.document) {
+            return of(item);
+          }
+          return this.foundItemApi.identify(item.id, identification).pipe(
+            catchError((error: ApiError) => {
+              this.identifyError.set(error.message);
+              return of(item);
+            }),
+          );
+        }),
+        finalize(() => this.submitting.set(false)),
+      )
       .subscribe({
         next: (item) => {
           this.registered.set(item);
@@ -208,10 +234,15 @@ export default class NewFoundItemPage {
       risk: '',
       internalDescription: '',
       reservedDetails: '',
+      broughtBy: '',
+      identifiedName: '',
+      identifiedEmail: '',
+      identifiedDocument: '',
     });
     this.fieldErrors.set({});
     this.error.set(null);
     this.registered.set(null);
+    this.identifyError.set(null);
     this.focus('#photo');
   }
 
