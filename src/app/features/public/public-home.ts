@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MonthCounts, PublicCountsApi } from './public-counts-api';
 
 /**
  * Página pública (RF40): divulga a sala, o horário e como funciona, sem login. Nada de foto, descrição ou local de
@@ -12,6 +13,15 @@ import { RouterLink } from '@angular/router';
   styleUrl: './public-home.scss',
 })
 export default class PublicHome {
+  /** Contagens dos objetos esperando o dono (RF41); se a chamada falhar, a seção só não aparece. */
+  protected readonly months = signal<MonthCounts[]>([]);
+
+  constructor() {
+    inject(PublicCountsApi)
+      .byMonth()
+      .subscribe({ next: (months) => this.months.set(months), error: () => {} });
+  }
+
   protected readonly registerLossUrl = '/student/losses/new';
   // "Meus registros" é a página inicial da área do estudante.
   protected readonly myLossesUrl = '/student';
