@@ -137,6 +137,20 @@ a:hover {
   padding: var(--space-6) var(--space-4) var(--space-7);
 }
 
+// Telas que precisam de duas colunas, como a comparação lado a lado.
+.page--wide {
+  max-width: 64rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .skip-link {
   position: absolute;
   left: var(--space-2);

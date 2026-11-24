@@ -1,0 +1,159 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.title h1 {
+  margin: 0;
+}
+
+.alert p {
+  margin: 0;
+}
+
+.summons {
+  margin-top: var(--space-2) !important;
+}
+
+.alert:focus {
+  outline: none;
+}
+
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+figure {
+  margin: 0;
+}
+
+.photo {
+  width: min(100%, 18rem);
+  aspect-ratio: 4 / 3;
+}
+
+figcaption {
+  margin-top: var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.compare {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compare th,
+.compare td {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.compare tbody th {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.compare td {
+  color: var(--color-heading);
+}
+
+.strong {
+  font-weight: 700;
+}
+
+// O que só o dono saberia: é o que o funcionário compara primeiro.
+.reserved {
+  background: var(--color-orange-soft);
+}
+
+.reserved th {
+  color: var(--color-orange-text) !important;
+}
+
+.where {
+  margin: var(--space-3) 0 var(--space-5);
+}
+
+// Celular: cada linha vira um cartão com os dois valores, cada um com o nome do lado.
+@media (max-width: 47.99rem) {
+  .compare thead {
+    display: none;
+  }
+
+  .compare tr {
+    display: block;
+    margin-bottom: var(--space-3);
+    padding: var(--space-2) 0;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-lg);
+  }
+
+  .compare th,
+  .compare td {
+    display: block;
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .compare td::before {
+    content: attr(data-side) ': ';
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+}
+
+@media (min-width: 48rem) {
+  .compare thead th {
+    color: var(--color-heading);
+    font-size: 1.0625rem;
+    border-bottom: 2px solid var(--color-divider);
+  }
+
+  .compare tbody tr {
+    border-bottom: 1px solid var(--color-divider);
+  }
+
+  .compare tbody th {
+    width: 11rem;
+  }
+}
+
+.decide {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-divider);
+}
+
+.decisions,
+.panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.panel {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-sky-soft);
+}
+
+.panel p {
+  margin-top: 0;
+}

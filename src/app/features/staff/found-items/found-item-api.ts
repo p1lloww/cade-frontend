@@ -30,6 +30,21 @@ export class FoundItemApi {
     return this.api.post<FoundItem>('/found-items', body);
   }
 
+  find(id: string): Observable<FoundItem> {
+    return this.api.get<FoundItem>(`/found-items/${id}`);
+  }
+
+  /** Últimos objetos disponíveis, do mais recente para o mais antigo. */
+  recentAvailable(size = 10): Observable<FoundItem[]> {
+    return this.api
+      .get<{ content: FoundItem[] }>('/found-items', {
+        status: 'AVAILABLE',
+        sort: 'registeredAt,desc',
+        size,
+      })
+      .pipe(map(({ content }) => content));
+  }
+
   /** Caixa do mês sugerida para a data (RF05). */
   suggestStorageBox(date: string): Observable<string> {
     return this.api
@@ -42,10 +57,5 @@ export class FoundItemApi {
     return this.api
       .get<{ places: PlaceOption[] }>('/found-items/search-options')
       .pipe(map(({ places }) => places));
-  }
-
-  /** Foto do objeto como blob, pedida com o token (D09). */
-  photo(path: string): Observable<Blob> {
-    return this.api.getBlob(path);
   }
 }
