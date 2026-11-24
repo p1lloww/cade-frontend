@@ -1,9 +1,3 @@
-/** Categoria de objeto (GET /categories). */
-export interface Category {
-  id: string;
-  name: string;
-}
-
 export type Shift = 'MORNING' | 'AFTERNOON' | 'EVENING';
 
 export const SHIFT_LABELS: Readonly<Record<Shift, string>> = {

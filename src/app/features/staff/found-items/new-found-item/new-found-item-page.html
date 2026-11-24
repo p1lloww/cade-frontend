@@ -1,0 +1,314 @@
+@if (registered(); as item) {
+  <section class="done" aria-labelledby="done-title">
+    <h1 id="done-title" tabindex="-1">Objeto cadastrado</h1>
+    <div class="done__card">
+      @if (photoUrl(); as url) {
+        <img class="done__photo" [src]="url" alt="Foto do objeto cadastrado" />
+      }
+      <dl class="done__summary">
+        <div>
+          <dt>Categoria</dt>
+          <dd>{{ item.categoryName }} · risco {{ item.riskLabel.toLowerCase() }}</dd>
+        </div>
+        <div>
+          <dt>Achado em</dt>
+          <dd>{{ item.block }}, {{ item.room }} · {{ formatDay(item.foundOn) }}</dd>
+        </div>
+        <div>
+          <dt>Guardar na</dt>
+          <dd class="done__box">{{ item.storageBox }}</dd>
+        </div>
+        <div>
+          <dt>Situação</dt>
+          <dd>
+            <span class="tag tag--success">{{ item.statusLabel }}</span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+    <p class="muted">Ele já está sendo comparado com os registros de perda abertos.</p>
+    <div class="done__actions">
+      <button class="button button--large" type="button" (click)="registerAnother()">
+        Cadastrar outro
+      </button>
+      <a class="button button--secondary" routerLink="/staff">Voltar ao início</a>
+    </div>
+  </section>
+} @else {
+  <h1 id="form-title" tabindex="-1">Cadastrar objeto</h1>
+  <p class="lead">Foto, categoria, onde e quando. O resto é opcional.</p>
+
+  <app-error-message [error]="error()" />
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <!-- 1. Foto -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">1</span>Foto
+      </legend>
+      <input
+        id="photo"
+        class="photo__input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        (change)="choosePhoto($event)"
+        [attr.aria-invalid]="fieldError('photo') ? true : null"
+        [attr.aria-describedby]="describedBy('photo')"
+      />
+      @if (photoUrl(); as url) {
+        <div class="photo__preview">
+          <img [src]="url" alt="Foto escolhida do objeto" />
+          <label for="photo" class="button button--secondary">Trocar foto</label>
+        </div>
+      } @else {
+        <label for="photo" class="photo__pick" [class.photo__pick--invalid]="fieldError('photo')">
+          <svg
+            viewBox="0 0 24 24"
+            width="40"
+            height="40"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"
+            />
+            <circle cx="12" cy="13" r="3.6" />
+          </svg>
+          <span class="photo__pick-title">
+            {{ preparingPhoto() ? 'Preparando a foto…' : 'Tirar foto do objeto' }}
+          </span>
+          <span class="photo__pick-hint">No computador, escolha uma imagem.</span>
+        </label>
+      }
+      @if (fieldError('photo'); as message) {
+        <p id="photo-error" class="field__error">{{ message }}</p>
+      }
+    </fieldset>
+
+    <!-- 2. Categoria -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">2</span>Categoria
+      </legend>
+      @switch (categoriesState()) {
+        @case ('loading') {
+          <p class="muted" role="status">Carregando as categorias…</p>
+        }
+        @case ('error') {
+          <div class="alert alert--error" role="alert">
+            Não foi possível carregar as categorias.
+            <button class="button--link" type="button" (click)="loadCategories()">
+              Tentar de novo
+            </button>
+          </div>
+        }
+        @default {
+          <div class="choices" role="radiogroup" aria-label="Categoria">
+            @for (category of categories(); track category.id; let first = $first) {
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="categoryId"
+                  formControlName="categoryId"
+                  [value]="category.id"
+                  [id]="first ? 'categoryId' : null"
+                  [attr.aria-invalid]="first && fieldError('categoryId') ? true : null"
+                  [attr.aria-describedby]="first ? describedBy('categoryId') : null"
+                />
+                <span class="choice__box">{{ category.name }}</span>
+              </label>
+            }
+          </div>
+        }
+      }
+      @if (fieldError('categoryId'); as message) {
+        <p id="categoryId-error" class="field__error">{{ message }}</p>
+      }
+    </fieldset>
+
+    <!-- 3. Onde -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">3</span>Onde foi achado
+      </legend>
+      <div class="pair">
+        <div class="field">
+          <label class="field__label" for="block">Bloco</label>
+          <input
+            id="block"
+            class="input"
+            type="text"
+            list="block-options"
+            placeholder="Ex.: Bloco 400"
+            maxlength="30"
+            autocomplete="off"
+            formControlName="block"
+            [attr.aria-invalid]="fieldError('block') ? true : null"
+            [attr.aria-describedby]="describedBy('block')"
+          />
+          <datalist id="block-options">
+            @for (block of blocks(); track block) {
+              <option [value]="block"></option>
+            }
+          </datalist>
+          @if (fieldError('block'); as message) {
+            <span id="block-error" class="field__error">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label class="field__label" for="room">Sala ou lugar</label>
+          <input
+            id="room"
+            class="input"
+            type="text"
+            list="room-options"
+            placeholder="Ex.: Sala 421, cantina"
+            maxlength="30"
+            autocomplete="off"
+            formControlName="room"
+            [attr.aria-invalid]="fieldError('room') ? true : null"
+            [attr.aria-describedby]="describedBy('room')"
+          />
+          <datalist id="room-options">
+            @for (room of rooms(); track room) {
+              <option [value]="room"></option>
+            }
+          </datalist>
+          @if (fieldError('room'); as message) {
+            <span id="room-error" class="field__error">{{ message }}</span>
+          }
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 4. Quando e onde guardar -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">4</span>Quando e onde guardar
+      </legend>
+      <div class="pair">
+        <div class="field">
+          <label class="field__label" for="foundOn">Achado em</label>
+          <input
+            id="foundOn"
+            class="input"
+            type="date"
+            formControlName="foundOn"
+            [max]="today"
+            [attr.aria-invalid]="fieldError('foundOn') ? true : null"
+            [attr.aria-describedby]="describedBy('foundOn')"
+          />
+          @if (fieldError('foundOn'); as message) {
+            <span id="foundOn-error" class="field__error">{{ message }}</span>
+          }
+          <div class="quick-dates">
+            <button class="button--link" type="button" (click)="setDay(today)">Hoje</button>
+            <button class="button--link" type="button" (click)="setDay(yesterday)">Ontem</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="storageBox">Caixa</label>
+          <input
+            id="storageBox"
+            class="input"
+            type="text"
+            maxlength="40"
+            formControlName="storageBox"
+            (input)="editStorageBox()"
+            [attr.aria-invalid]="fieldError('storageBox') ? true : null"
+            [attr.aria-describedby]="describedBy('storageBox', 'storageBox-hint')"
+          />
+          <span id="storageBox-hint" class="field__hint">Sugerida pela data. Pode trocar.</span>
+          @if (fieldError('storageBox'); as message) {
+            <span id="storageBox-error" class="field__error">{{ message }}</span>
+          }
+        </div>
+      </div>
+    </fieldset>
+
+    <details
+      class="more"
+      [open]="
+        !!(fieldError('internalDescription') || fieldError('reservedDetails') || fieldError('risk'))
+      "
+    >
+      <summary>Mais detalhes <span class="optional">(opcional)</span></summary>
+      <p class="more__note">Só funcionários veem estes campos. Nunca aparecem para estudantes.</p>
+
+      <div class="field">
+        <label class="field__label" for="internalDescription">Descrição interna</label>
+        <textarea
+          id="internalDescription"
+          class="input input--area"
+          rows="2"
+          placeholder="Cor, marca, modelo"
+          formControlName="internalDescription"
+          [attr.maxlength]="maxTextLength"
+          [attr.aria-invalid]="fieldError('internalDescription') ? true : null"
+          [attr.aria-describedby]="describedBy('internalDescription')"
+        ></textarea>
+        @if (fieldError('internalDescription'); as message) {
+          <span id="internalDescription-error" class="field__error">{{ message }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="reservedDetails">Detalhes reservados</label>
+        <textarea
+          id="reservedDetails"
+          class="input input--area"
+          rows="2"
+          placeholder="O que só o dono saberia: adesivo, arranhão, nome gravado"
+          formControlName="reservedDetails"
+          [attr.maxlength]="maxTextLength"
+          [attr.aria-invalid]="fieldError('reservedDetails') ? true : null"
+          [attr.aria-describedby]="describedBy('reservedDetails', 'reservedDetails-hint')"
+        ></textarea>
+        <span id="reservedDetails-hint" class="field__hint"
+          >Usados para conferir o dono no balcão.</span
+        >
+        @if (fieldError('reservedDetails'); as message) {
+          <span id="reservedDetails-error" class="field__error">{{ message }}</span>
+        }
+      </div>
+
+      @if (defaultRiskLabel(); as label) {
+        <div class="field">
+          <label class="field__label" for="risk">Risco</label>
+          <select
+            id="risk"
+            class="input"
+            formControlName="risk"
+            [attr.aria-invalid]="fieldError('risk') ? true : null"
+            [attr.aria-describedby]="describedBy('risk', 'risk-hint')"
+          >
+            <option value="">{{ label }} (padrão da categoria)</option>
+            @for (option of riskOptions(); track option.level) {
+              <option [value]="option.level">{{ option.label }}</option>
+            }
+          </select>
+          <span id="risk-hint" class="field__hint">
+            Aumente se o objeto for caro, como uma garrafa térmica de marca. O risco nunca fica
+            menor que o da categoria.
+          </span>
+          @if (fieldError('risk'); as message) {
+            <span id="risk-error" class="field__error">{{ message }}</span>
+          }
+        </div>
+      }
+    </details>
+
+    <button
+      class="button button--large button--block"
+      type="submit"
+      [disabled]="submitting() || preparingPhoto()"
+    >
+      {{ submitting() ? 'Cadastrando…' : 'Cadastrar objeto' }}
+    </button>
+  </form>
+}
