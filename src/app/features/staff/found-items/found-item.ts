@@ -26,7 +26,7 @@ export interface FoundItem {
   storageBox: string;
   risk: RiskLevel;
   riskLabel: string;
-  status: string;
+  status: FoundItemStatus;
   statusLabel: string;
   internalDescription: string | null;
   reservedDetails: string | null;
@@ -39,4 +39,39 @@ export interface FoundItem {
 export interface PlaceOption {
   block: string;
   rooms: string[];
+}
+
+export type FoundItemStatus = 'AVAILABLE' | 'RESERVED' | 'RETURNED' | 'UNCLAIMED' | 'DISPOSED';
+
+/** Classe do selo de cada situação; o nome da situação sempre vai escrito (RNF10). */
+export const STATUS_TAG: Readonly<Record<FoundItemStatus, string>> = {
+  AVAILABLE: 'tag--info',
+  RESERVED: 'tag--highlight',
+  RETURNED: 'tag--success',
+  UNCLAIMED: 'tag--warning',
+  DISPOSED: 'tag--neutral',
+};
+
+/** Filtros da busca (GET /found-items); todos opcionais e combinados. */
+export interface FoundItemFilters {
+  q?: string;
+  categoryId?: string;
+  /** AAAA-MM */
+  month?: string;
+  block?: string;
+  room?: string;
+  status?: FoundItemStatus[];
+}
+
+/** Valores para os filtros: só o que tem algum objeto (GET /found-items/search-options). */
+export interface SearchOptions {
+  categories: { id: string; name: string }[];
+  places: PlaceOption[];
+  months: string[];
+  statuses: { code: FoundItemStatus; label: string }[];
+}
+
+export interface FoundItemPage {
+  content: FoundItem[];
+  page: { size: number; number: number; totalElements: number; totalPages: number };
 }

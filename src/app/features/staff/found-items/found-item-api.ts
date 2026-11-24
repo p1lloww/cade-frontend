@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiClient } from '../../../core/api/api-client';
-import { FoundItem, FoundItemRequest, PlaceOption } from './found-item';
+import {
+  FoundItem,
+  FoundItemFilters,
+  FoundItemPage,
+  FoundItemRequest,
+  PlaceOption,
+  SearchOptions,
+} from './found-item';
 
 /** Chamadas da API para os objetos achados (só funcionário e administrador). */
 @Injectable({ providedIn: 'root' })
@@ -34,15 +41,22 @@ export class FoundItemApi {
     return this.api.get<FoundItem>(`/found-items/${id}`);
   }
 
-  /** Últimos objetos disponíveis, do mais recente para o mais antigo. */
-  recentAvailable(size = 10): Observable<FoundItem[]> {
-    return this.api
-      .get<{ content: FoundItem[] }>('/found-items', {
-        status: 'AVAILABLE',
-        sort: 'registeredAt,desc',
-        size,
-      })
-      .pipe(map(({ content }) => content));
+  /**
+   * Busca (RF10). Com texto, os mais relevantes primeiro; sem texto, os achados mais recentemente. Filtros vazios
+   * não são enviados.
+   */
+  search(filters: FoundItemFilters, page = 0, size = 20): Observable<FoundItemPage> {
+    const params: Record<string, string | number | string[]> = { page, size };
+    for (const [key, value] of Object.entries(filters)) {
+      if (Array.isArray(value) ? value.length > 0 : value) {
+        params[key] = value;
+      }
+    }
+    return this.api.get<FoundItemPage>('/found-items', params);
+  }
+
+  searchOptions(): Observable<SearchOptions> {
+    return this.api.get<SearchOptions>('/found-items/search-options');
   }
 
   /** Caixa do mês sugerida para a data (RF05). */
@@ -54,8 +68,6 @@ export class FoundItemApi {
 
   /** Blocos e salas onde já se achou algum objeto, para sugerir no cadastro. */
   places(): Observable<PlaceOption[]> {
-    return this.api
-      .get<{ places: PlaceOption[] }>('/found-items/search-options')
-      .pipe(map(({ places }) => places));
+    return this.searchOptions().pipe(map(({ places }) => places));
   }
 }
