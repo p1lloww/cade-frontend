@@ -76,6 +76,11 @@ export default class AdminHome {
       text: 'Dar e retirar o perfil de funcionário.',
     },
     {
+      path: '/staff/unclaimed',
+      title: 'Não reclamados',
+      text: 'Objetos com mais de 90 dias na sala, por caixa, e o destino deles.',
+    },
+    {
       path: '/staff',
       title: 'Área da sala',
       text: 'Buscar e cadastrar objetos, sugestões e balcão.',
