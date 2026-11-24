@@ -155,3 +155,86 @@
   color: var(--color-muted);
   font-size: 1.0625rem;
 }
+
+// Contagens: só números, sem foto, descrição ou local (RF41, RN03).
+.counts {
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-sky-soft);
+}
+
+.counts__inner,
+.share__inner {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: clamp(3rem, 6vw, 4.5rem) var(--space-4);
+}
+
+.counts__title,
+.share__title {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  letter-spacing: -0.035em;
+}
+
+.counts__lead,
+.counts__hint {
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.month {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.month p {
+  margin: 0;
+}
+
+.month__name {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.month__total {
+  color: var(--color-heading);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.month__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.month__categories li {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-orange-soft);
+  color: var(--color-heading);
+}
+
+.share {
+  border-top: 1px solid var(--color-divider);
+}
+
+.share__inner p {
+  margin: var(--space-3) 0 var(--space-5);
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+}

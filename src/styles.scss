@@ -565,6 +565,16 @@ a:hover {
   }
 }
 
+// Impressão (cartaz): só o conteúdo, sem cabeçalho, faixa e rodapé.
+@media print {
+  app-header,
+  app-footer,
+  .skip-link,
+  .no-print {
+    display: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

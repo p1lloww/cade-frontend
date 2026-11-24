@@ -33,6 +33,33 @@
   </aside>
 </section>
 
+@if (months().length > 0) {
+  <section class="counts" aria-labelledby="counts-title">
+    <div class="counts__inner">
+      <h2 id="counts-title" class="counts__title">Esperando o dono</h2>
+      <p class="counts__lead">Objetos na sala agora, pelo mês em que foram achados.</p>
+      <ul class="months">
+        @for (month of months(); track month.month) {
+          <li class="month">
+            <p class="month__name">{{ month.label.replace('/', ' de ') }}</p>
+            <p class="month__total">
+              {{ month.total === 1 ? '1 objeto' : month.total + ' objetos' }}
+            </p>
+            <ul class="month__categories">
+              @for (category of month.categories; track category.category) {
+                <li>
+                  {{ category.category }} <strong>{{ category.count }}</strong>
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
+      <p class="counts__hint">Reconheceu algo? Registre a perda: a equipe compara e chama você.</p>
+    </div>
+  </section>
+}
+
 <section class="how" aria-labelledby="how-title">
   <div class="how__inner">
     <h2 id="how-title" class="how__title">Como funciona</h2>
@@ -45,5 +72,13 @@
         </li>
       }
     </ol>
+  </div>
+</section>
+
+<section class="share" aria-labelledby="share-title">
+  <div class="share__inner">
+    <h2 id="share-title" class="share__title">Ajude a divulgar</h2>
+    <p>Cole o cartaz com o QR code no mural do seu bloco ou mande o link no grupo da turma.</p>
+    <a class="button button--secondary" routerLink="/cartaz">Imprimir cartaz com QR code</a>
   </div>
 </section>
