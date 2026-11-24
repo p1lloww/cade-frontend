@@ -1,0 +1,158 @@
+<div class="top">
+  <h1>Área da sala</h1>
+  <div class="top__actions">
+    <a class="button button--large" routerLink="/staff/items/new">Cadastrar objeto</a>
+    <a class="button button--secondary" routerLink="/staff/counter">Balcão</a>
+  </div>
+</div>
+
+<form class="search" [formGroup]="form" (ngSubmit)="submit()" role="search">
+  <div class="search__bar">
+    <label class="visually-hidden" for="q">Buscar objetos</label>
+    <input
+      id="q"
+      class="input"
+      type="search"
+      placeholder="Ex.: fone preto"
+      autocomplete="off"
+      formControlName="q"
+    />
+    <button class="button" type="submit">Buscar</button>
+  </div>
+
+  <details class="filters" [open]="activeFilters() > 0">
+    <summary>
+      Mais filtros
+      @if (activeFilters() > 0) {
+        <span class="filters__count">({{ activeFilters() }} em uso)</span>
+      }
+    </summary>
+
+    <div class="filters__grid">
+      <div class="field">
+        <label class="field__label" for="categoryId">Categoria</label>
+        <select id="categoryId" class="input" formControlName="categoryId">
+          <option value="">Todas</option>
+          @for (category of options()?.categories ?? []; track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="month">Mês em que foi achado</label>
+        <select id="month" class="input" formControlName="month">
+          <option value="">Todos</option>
+          @for (month of options()?.months ?? []; track month) {
+            <option [value]="month">{{ monthLabel(month) }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="block">Bloco</label>
+        <select id="block" class="input" formControlName="block">
+          <option value="">Todos</option>
+          @for (place of options()?.places ?? []; track place.block) {
+            <option [value]="place.block">{{ place.block }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="room">Sala</label>
+        <select id="room" class="input" formControlName="room">
+          <option value="">Todas</option>
+          @for (room of rooms(); track room) {
+            <option [value]="room">{{ room }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <p class="field__label" id="status-label">Situação</p>
+    <div class="choices" role="group" aria-labelledby="status-label">
+      @for (status of options()?.statuses ?? []; track status.code) {
+        <label class="choice">
+          <input
+            type="checkbox"
+            [checked]="form.controls.status.value.includes(status.code)"
+            (change)="toggleStatus(status.code, $any($event.target).checked)"
+          />
+          <span class="choice__box">{{ status.label }}</span>
+        </label>
+      }
+    </div>
+
+    <div class="filters__actions">
+      <button class="button button--secondary" type="submit">Aplicar filtros</button>
+      <button class="button--link" type="button" (click)="clear()">Limpar tudo</button>
+    </div>
+  </details>
+</form>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Buscando…</p>
+  }
+  @case ('error') {
+    <app-error-message [error]="error()" />
+    <button class="button button--secondary" type="button" (click)="retry()">Tentar de novo</button>
+  }
+  @default {
+    <p class="count" role="status">
+      {{ total() === 1 ? '1 objeto' : total() + ' objetos' }}
+      @if (q()) {
+        para “{{ q() }}”
+      }
+    </p>
+
+    @if (items().length === 0) {
+      <div class="empty">
+        <p>Nenhum objeto encontrado.</p>
+        @if (q() || activeFilters() > 0) {
+          <button class="button--link" type="button" (click)="clear()">Limpar a busca</button>
+        }
+      </div>
+    } @else {
+      <ul class="results">
+        @for (item of items(); track item.id) {
+          <li class="result">
+            <app-api-photo
+              class="result__photo"
+              [path]="item.photoPath"
+              [alt]="'Foto: ' + item.categoryName"
+            />
+            <div class="result__text">
+              <div class="result__head">
+                <a class="result__title" [routerLink]="['/staff/items', item.id, 'suggestions']">
+                  {{ item.internalDescription || item.categoryName }}
+                </a>
+                <span class="tag" [class]="statusTag[item.status]">{{ item.statusLabel }}</span>
+              </div>
+              <span class="muted">
+                {{ item.categoryName }} · {{ item.block }}, {{ item.room }} ·
+                {{ formatDay(item.foundOn) }}
+              </span>
+              <span class="muted">{{ item.storageBox }}</span>
+              <span class="result__links">
+                <a [routerLink]="['/staff/items', item.id, 'suggestions']">Ver sugestões</a>
+                @if (canHandOver(item)) {
+                  <a [routerLink]="['/staff/items', item.id, 'walk-in']">Entregar sem registro</a>
+                }
+              </span>
+            </div>
+          </li>
+        }
+      </ul>
+
+      @if (hasMore()) {
+        <button
+          class="button button--secondary more"
+          type="button"
+          (click)="loadMore()"
+          [disabled]="loadingMore()"
+        >
+          {{ loadingMore() ? 'Carregando…' : 'Carregar mais' }}
+        </button>
+      }
+    }
+  }
+}

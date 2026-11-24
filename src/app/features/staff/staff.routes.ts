@@ -1,7 +1,11 @@
 import { Routes } from '@angular/router';
 
 export default [
-  { path: '', title: 'Área da sala · Cadê?', loadComponent: () => import('./staff-home') },
+  {
+    path: '',
+    title: 'Área da sala · Cadê?',
+    loadComponent: () => import('./found-items/search/found-item-search-page'),
+  },
   {
     path: 'items/new',
     title: 'Cadastrar objeto · Cadê?',
