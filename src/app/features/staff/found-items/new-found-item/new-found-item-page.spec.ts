@@ -48,14 +48,12 @@ describe('NewFoundItemPage', () => {
     fixture = TestBed.createComponent(NewFoundItemPage);
     page = fixture.nativeElement as HTMLElement;
     http.expectOne('/api/categories').flush(CATEGORIES);
-    http
-      .expectOne('/api/found-items/search-options')
-      .flush({
-        categories: [],
-        places: [{ block: 'Bloco 400', rooms: ['Sala 421', 'Sala 422'] }],
-        months: [],
-        statuses: [],
-      });
+    http.expectOne('/api/found-items/search-options').flush({
+      categories: [],
+      places: [{ block: 'Bloco 400', rooms: ['Sala 421', 'Sala 422'] }],
+      months: [],
+      statuses: [],
+    });
     suggestion(today).flush({ storageBox: 'Caixa Novembro/2026' });
     await fixture.whenStable();
   });
