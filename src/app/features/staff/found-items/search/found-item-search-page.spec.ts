@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { foundItemFixture } from '../../../../../testing/found-item-fixture';
 import { FoundItem } from '../found-item';
 import FoundItemSearchPage from './found-item-search-page';
 
@@ -19,26 +20,7 @@ const OPTIONS = {
   ],
 };
 
-function item(id: string, extra: Partial<FoundItem> = {}): FoundItem {
-  return {
-    id,
-    categoryName: 'Fone',
-    block: 'Bloco 400',
-    room: 'Sala 421',
-    foundOn: '2026-11-20',
-    storageBox: 'Caixa Novembro/2026',
-    risk: 'MEDIUM',
-    riskLabel: 'Médio',
-    status: 'AVAILABLE',
-    statusLabel: 'Disponível',
-    internalDescription: `Fone ${id}`,
-    reservedDetails: null,
-    photoPath: `/found-items/${id}/photo`,
-    registeredAt: '2026-11-20T12:00:00Z',
-    version: 0,
-    ...extra,
-  };
-}
+const item = foundItemFixture;
 
 function page(content: FoundItem[], number = 0, totalElements = content.length) {
   return {
@@ -105,7 +87,10 @@ describe('FoundItemSearchPage', () => {
     const links = [...element.querySelectorAll('.result')].map((r) =>
       [...r.querySelectorAll('.result__links a')].map((a) => a.textContent?.trim()),
     );
-    expect(links).toEqual([['Ver sugestões', 'Entregar sem registro'], ['Ver sugestões']]);
+    expect(links).toEqual([
+      ['Ver sugestões', 'Editar', 'Entregar sem registro'],
+      ['Ver sugestões', 'Editar'],
+    ]);
   });
 
   it('busca com os filtros do endereço, sem mandar os vazios', async () => {

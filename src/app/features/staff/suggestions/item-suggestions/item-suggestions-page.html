@@ -24,6 +24,7 @@
             {{ item.block }}, {{ item.room }} · {{ formatDay(item.foundOn) }} ·
             {{ item.storageBox }}
           </p>
+          <a class="edit-link" [routerLink]="['/staff/items', item.id, 'edit']">Editar objeto</a>
         </div>
       </section>
     }

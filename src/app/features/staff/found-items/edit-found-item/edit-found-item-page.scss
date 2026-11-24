@@ -1,0 +1,49 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: 600;
+}
+
+.item {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.item h1 {
+  margin-bottom: var(--space-1);
+}
+
+.item p {
+  margin: 0;
+}
+
+.item__photo {
+  flex-shrink: 0;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+}
+
+.pair {
+  display: grid;
+  gap: 0 var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+@media (min-width: 36rem) {
+  .pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}

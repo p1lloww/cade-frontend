@@ -101,3 +101,10 @@
 .walk-in a {
   font-weight: 700;
 }
+
+.edit-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: 700;
+}

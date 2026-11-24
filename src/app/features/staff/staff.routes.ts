@@ -22,6 +22,11 @@ export default [
     loadComponent: () => import('./suggestions/compare/suggestion-compare-page'),
   },
   {
+    path: 'items/:id/edit',
+    title: 'Editar objeto · Cadê?',
+    loadComponent: () => import('./found-items/edit-found-item/edit-found-item-page'),
+  },
+  {
     path: 'items/:id/walk-in',
     title: 'Entregar sem registro · Cadê?',
     loadComponent: () => import('./counter/walk-in/walk-in-page'),

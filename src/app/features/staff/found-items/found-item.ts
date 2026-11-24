@@ -14,11 +14,14 @@ export interface FoundItemRequest {
   risk: RiskLevel | null;
   internalDescription: string | null;
   reservedDetails: string | null;
+  /** Quem trouxe: nome e matrícula, ou "equipe de limpeza" (RF07). */
+  broughtBy: string | null;
 }
 
 /** Objeto achado, com tudo o que o funcionário pode ver (RN03). */
 export interface FoundItem {
   id: string;
+  categoryId: string;
   categoryName: string;
   block: string;
   room: string;
@@ -32,7 +35,35 @@ export interface FoundItem {
   reservedDetails: string | null;
   photoPath: string;
   registeredAt: string;
+  /** Quem trouxe o objeto (RF07); nulo se não foi registrado. */
+  broughtBy: string | null;
+  /** Se foi achado no objeto um nome, e-mail ou documento do dono (RF08). */
+  identified: boolean;
+  identifiedName: string | null;
+  identifiedEmail: string | null;
+  identifiedDocument: string | null;
   version: number;
+}
+
+/** Correção dos dados de um objeto (PUT /found-items/{id}); o motivo vai para o histórico (RF11). */
+export interface FoundItemUpdate {
+  categoryId: string;
+  block: string;
+  room: string;
+  foundOn: string;
+  storageBox: string | null;
+  risk: RiskLevel | null;
+  internalDescription: string | null;
+  reservedDetails: string | null;
+  reason: string;
+  version: number;
+}
+
+/** O que foi achado no objeto e identifica o dono (RF08); pelo menos um dos três. */
+export interface Identification {
+  name: string | null;
+  email: string | null;
+  document: string | null;
 }
 
 /** Um bloco e as salas dele onde já se achou algum objeto (GET /found-items/search-options). */
