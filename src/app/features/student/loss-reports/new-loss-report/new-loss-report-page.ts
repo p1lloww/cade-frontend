@@ -13,8 +13,10 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiError } from '../../../../core/api/api-error';
 import { ErrorMessage } from '../../../../shared/error-message/error-message';
-import { formatDate } from '../../../../shared/format/dates';
-import { Category, LossReport, LossReportRequest, Shift, SHIFT_LABELS } from '../loss-report';
+import { formatDate, recentDays } from '../../../../shared/format/dates';
+import { Category } from '../../../../shared/categories/category';
+import { CategoryApi } from '../../../../shared/categories/category-api';
+import { LossReport, LossReportRequest, Shift, SHIFT_LABELS } from '../loss-report';
 import { LossReportApi } from '../loss-report-api';
 
 const MAX_TEXT_LENGTH = 500;
@@ -37,14 +39,15 @@ type LocationGroup = FormGroup<{ block: FormControl<string>; room: FormControl<s
 })
 export default class NewLossReportPage {
   private readonly lossReportApi = inject(LossReportApi);
+  private readonly categoryApi = inject(CategoryApi);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly maxTextLength = MAX_TEXT_LENGTH;
   protected readonly maxLocations = MAX_LOCATIONS;
   protected readonly shifts = Object.entries(SHIFT_LABELS) as [Shift, string][];
-  protected readonly today = isoDate(new Date());
-  protected readonly yesterday = isoDate(new Date(Date.now() - 86_400_000));
+  protected readonly today = recentDays().today;
+  protected readonly yesterday = recentDays().yesterday;
 
   protected readonly form = new FormGroup({
     categoryId: new FormControl('', { nonNullable: true }),
@@ -80,7 +83,7 @@ export default class NewLossReportPage {
 
   protected loadCategories(): void {
     this.categoriesState.set('loading');
-    this.lossReportApi.categories().subscribe({
+    this.categoryApi.list().subscribe({
       next: (categories) => {
         this.categories.set(categories);
         this.categoriesState.set('ready');
@@ -241,12 +244,6 @@ function newLocation(): LocationGroup {
     block: new FormControl('', { nonNullable: true }),
     room: new FormControl('', { nonNullable: true }),
   });
-}
-
-/** Data local no formato AAAA-MM-DD (o `toISOString` usa UTC e erra a data à noite). */
-function isoDate(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 function daysBetween(from: string, until: string): number {

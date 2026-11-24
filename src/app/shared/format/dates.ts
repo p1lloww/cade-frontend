@@ -25,3 +25,16 @@ export function formatPeriod(from: string, until: string | null): string {
 export function formatDate(value: string): string {
   return new Date(value).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
 }
+
+/** Data local no formato da API (AAAA-MM-DD); o `toISOString` usa UTC e erra a data à noite. */
+export function isoDate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Hoje e ontem no formato da API, para os atalhos dos formulários. */
+export function recentDays(): { today: string; yesterday: string } {
+  const now = new Date();
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  return { today: isoDate(now), yesterday: isoDate(yesterday) };
+}
