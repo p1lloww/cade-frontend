@@ -24,10 +24,10 @@ describe('PublicHome', () => {
     expect(steps).toEqual(['Registre o que perdeu', 'A equipe compara', 'Você busca no balcão']);
   });
 
-  it('leva o botão "Registrar perda" para a área do estudante, que pede o login', () => {
+  it('leva o botão "Registrar perda" para o registro, que pede o login', () => {
     const link = [...page.querySelectorAll('a')].find((a) =>
       a.textContent?.includes('Registrar perda'),
     );
-    expect(link?.getAttribute('href')).toBe('/student');
+    expect(link?.getAttribute('href')).toBe('/student/losses/new');
   });
 });

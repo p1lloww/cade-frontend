@@ -1,0 +1,316 @@
+@if (registered(); as report) {
+  <section class="done" aria-labelledby="done-title">
+    <span class="done__icon" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      </svg>
+    </span>
+    <h1 id="done-title" tabindex="-1">Perda registrada</h1>
+    <p class="done__lead">{{ report.statusDescription }}</p>
+
+    <dl class="done__summary">
+      <div>
+        <dt>Objeto</dt>
+        <dd>{{ report.categoryName }} · {{ report.description }}</dd>
+      </div>
+      <div>
+        <dt>Onde</dt>
+        <dd>{{ report.locationsLabel }}</dd>
+      </div>
+      <div>
+        <dt>Situação</dt>
+        <dd>
+          <span class="tag tag--info">{{ report.statusLabel }}</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Fica aberto até</dt>
+        <dd>{{ formatDate(report.expiresAt) }}</dd>
+      </div>
+    </dl>
+
+    <div class="done__actions">
+      <a class="button" routerLink="/student">Ver meus registros</a>
+      <button class="button button--secondary" type="button" (click)="startOver()">
+        Registrar outra perda
+      </button>
+    </div>
+  </section>
+} @else {
+  <h1 id="form-title" tabindex="-1">Registrar perda</h1>
+  <p class="lead">
+    Leva uns 2 minutos. Só a categoria, a descrição e a data são obrigatórias; o resto ajuda a achar
+    mais rápido.
+  </p>
+
+  <app-error-message [error]="error()" />
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <!-- 1. O quê -->
+    <fieldset class="group" [attr.aria-describedby]="describedBy('categoryId')">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">1</span>O que você perdeu?
+      </legend>
+
+      <p class="field__label" id="category-label">Categoria</p>
+      @switch (categoriesState()) {
+        @case ('loading') {
+          <p class="muted" role="status">Carregando as categorias…</p>
+        }
+        @case ('error') {
+          <div class="alert alert--error" role="alert">
+            Não foi possível carregar as categorias.
+            <button class="button--link" type="button" (click)="loadCategories()">
+              Tentar de novo
+            </button>
+          </div>
+        }
+        @default {
+          <div class="choices" role="radiogroup" aria-labelledby="category-label">
+            @for (category of categories(); track category.id; let first = $first) {
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="categoryId"
+                  formControlName="categoryId"
+                  [value]="category.id"
+                  [id]="first ? 'categoryId' : null"
+                  [attr.aria-invalid]="first && fieldError('categoryId') ? true : null"
+                />
+                <span class="choice__box">{{ category.name }}</span>
+              </label>
+            }
+          </div>
+        }
+      }
+      @if (fieldError('categoryId'); as message) {
+        <p [id]="errorId('categoryId')" class="field__error">{{ message }}</p>
+      }
+
+      <div class="field field--spaced">
+        <label class="field__label" for="description">Como ele é?</label>
+        <span id="description-hint" class="field__hint"
+          >Cor, marca, tamanho, capa, o que lembrar.</span
+        >
+        <textarea
+          id="description"
+          class="input input--area"
+          rows="3"
+          placeholder="Ex.: fone JBL preto, com estojo"
+          formControlName="description"
+          [attr.maxlength]="maxTextLength"
+          [attr.aria-invalid]="fieldError('description') ? true : null"
+          [attr.aria-describedby]="describedBy('description', 'description-hint')"
+        ></textarea>
+        @if (fieldError('description'); as message) {
+          <span [id]="errorId('description')" class="field__error">{{ message }}</span>
+        }
+      </div>
+    </fieldset>
+
+    <!-- 2. Onde -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">2</span>Onde você acha que perdeu?
+      </legend>
+      <p class="field__hint group__hint">Opcional. Se não lembra, deixe em branco.</p>
+
+      <div formArrayName="locations" class="locations">
+        @for (location of locations.controls; track location; let i = $index) {
+          <div class="location" [formGroupName]="i">
+            <div class="field">
+              <label class="field__label" [for]="'block-' + i">Bloco</label>
+              <input
+                [id]="'block-' + i"
+                class="input"
+                type="text"
+                placeholder="Ex.: Bloco 400"
+                maxlength="30"
+                formControlName="block"
+                [attr.aria-invalid]="fieldError('locations[' + i + '].block') ? true : null"
+                [attr.aria-describedby]="describedBy('locations[' + i + '].block')"
+              />
+              @if (fieldError('locations[' + i + '].block'); as message) {
+                <span [id]="errorId('locations[' + i + '].block')" class="field__error">{{
+                  message
+                }}</span>
+              }
+            </div>
+            <div class="field">
+              <label class="field__label" [for]="'room-' + i"
+                >Sala ou lugar <span class="optional">(se lembrar)</span></label
+              >
+              <input
+                [id]="'room-' + i"
+                class="input"
+                type="text"
+                placeholder="Ex.: Sala 421, cantina"
+                maxlength="30"
+                formControlName="room"
+              />
+            </div>
+            @if (locations.length > 1) {
+              <button
+                class="button--link location__remove"
+                type="button"
+                (click)="removeLocation(i)"
+                [attr.aria-label]="'Remover o local ' + (i + 1)"
+              >
+                Remover
+              </button>
+            }
+          </div>
+        }
+      </div>
+      @if (fieldError('locations'); as message) {
+        <p class="field__error">{{ message }}</p>
+      }
+      @if (locations.length < maxLocations) {
+        <button
+          class="button button--secondary button--small"
+          type="button"
+          (click)="addLocation()"
+        >
+          + Outro local
+        </button>
+      }
+    </fieldset>
+
+    <!-- 3. Quando -->
+    <fieldset class="group">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">3</span>Quando?
+      </legend>
+
+      <div class="choices choices--compact" role="radiogroup" aria-label="Uma data ou um período">
+        <label class="choice">
+          <input type="radio" name="when" formControlName="when" value="day" />
+          <span class="choice__box">Num dia</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="when" formControlName="when" value="period" />
+          <span class="choice__box">Entre duas datas</span>
+        </label>
+      </div>
+
+      <div class="dates">
+        <div class="field">
+          <label class="field__label" for="lostFrom">
+            {{ form.controls.when.value === 'period' ? 'De' : 'Data' }}
+          </label>
+          <input
+            id="lostFrom"
+            class="input"
+            type="date"
+            formControlName="lostFrom"
+            [max]="today"
+            [attr.aria-invalid]="fieldError('lostFrom') ? true : null"
+            [attr.aria-describedby]="describedBy('lostFrom')"
+          />
+          @if (fieldError('lostFrom'); as message) {
+            <span [id]="errorId('lostFrom')" class="field__error">{{ message }}</span>
+          }
+        </div>
+        @if (form.controls.when.value === 'period') {
+          <div class="field">
+            <label class="field__label" for="lostUntil">Até</label>
+            <input
+              id="lostUntil"
+              class="input"
+              type="date"
+              formControlName="lostUntil"
+              [min]="form.controls.lostFrom.value"
+              [max]="today"
+              [attr.aria-invalid]="fieldError('lostUntil') ? true : null"
+              [attr.aria-describedby]="describedBy('lostUntil')"
+            />
+            @if (fieldError('lostUntil'); as message) {
+              <span [id]="errorId('lostUntil')" class="field__error">{{ message }}</span>
+            }
+          </div>
+        } @else {
+          <div class="quick-dates">
+            <button class="button--link" type="button" (click)="setDay(today)">Hoje</button>
+            <button class="button--link" type="button" (click)="setDay(yesterday)">Ontem</button>
+          </div>
+        }
+      </div>
+
+      <p class="field__label" id="shift-label">Turno <span class="optional">(se lembrar)</span></p>
+      <div class="choices choices--compact" role="radiogroup" aria-labelledby="shift-label">
+        @for (shift of shifts; track shift[0]) {
+          <label class="choice">
+            <input type="radio" name="shift" formControlName="shift" [value]="shift[0]" />
+            <span class="choice__box">{{ shift[1] }}</span>
+          </label>
+        }
+        <label class="choice">
+          <input type="radio" name="shift" formControlName="shift" value="" />
+          <span class="choice__box">Não lembro</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- 4. Detalhe secreto -->
+    <fieldset class="group group--secret">
+      <legend class="group__title">
+        <span class="group__step" aria-hidden="true">4</span>Um detalhe que só você sabe
+      </legend>
+      <div class="secret-note" id="secret-hint">
+        <svg
+          class="secret-note__icon"
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+          <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+        </svg>
+        <p>
+          Um adesivo, um arranhão, um nome gravado. <strong>Outros estudantes nunca veem.</strong>
+          A equipe da sala usa esse detalhe para ter certeza de que o objeto é seu.
+        </p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="secretDetail"
+          >Detalhe <span class="optional">(opcional, mas ajuda muito)</span></label
+        >
+        <textarea
+          id="secretDetail"
+          class="input input--area"
+          rows="2"
+          placeholder="Ex.: adesivo de estrela no lado esquerdo"
+          formControlName="secretDetail"
+          [attr.maxlength]="maxTextLength"
+          [attr.aria-invalid]="fieldError('secretDetail') ? true : null"
+          [attr.aria-describedby]="describedBy('secretDetail', 'secret-hint')"
+        ></textarea>
+        @if (fieldError('secretDetail'); as message) {
+          <span [id]="errorId('secretDetail')" class="field__error">{{ message }}</span>
+        }
+      </div>
+    </fieldset>
+
+    <div class="submit">
+      <button class="button button--large button--block" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Registrando…' : 'Registrar perda' }}
+      </button>
+      <p class="field__hint">Se o objeto aparecer, você recebe um e-mail para buscar no balcão.</p>
+    </div>
+  </form>
+}
