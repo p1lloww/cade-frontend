@@ -1,0 +1,134 @@
+<a class="back" [routerLink]="isAdmin() ? '/admin' : '/staff'">Voltar</a>
+<h1>Não reclamados</h1>
+<p class="lead">
+  Objetos que passaram de 90 dias na sala. O dono ainda pode retirar até o destino ser registrado.
+  @if (!isAdmin()) {
+    Quem registra o destino é o administrador.
+  }
+</p>
+
+@if (notice(); as text) {
+  <p class="alert alert--success" role="status">{{ text }}</p>
+}
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando os não reclamados…</p>
+  }
+  @case ('error') {
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (boxes().length === 0) {
+      <p class="empty">Nenhum objeto não reclamado agora.</p>
+    } @else {
+      <p class="muted count">
+        {{ total() === 1 ? '1 objeto' : total() + ' objetos' }} em
+        {{ boxes().length === 1 ? '1 caixa' : boxes().length + ' caixas' }}
+      </p>
+      @for (box of boxes(); track box.storageBox) {
+        <section class="box" [attr.aria-labelledby]="'box-' + $index">
+          <h2 [id]="'box-' + $index">
+            {{ box.storageBox }}
+            <span class="box__count">{{
+              box.items.length === 1 ? '1 objeto' : box.items.length + ' objetos'
+            }}</span>
+          </h2>
+          <ul class="items">
+            @for (item of box.items; track item.id) {
+              <li class="item">
+                <div class="item__row">
+                  <app-api-photo
+                    class="item__photo"
+                    [path]="'/found-items/' + item.id + '/photo'"
+                    [alt]="'Foto: ' + item.categoryName"
+                  />
+                  <div class="item__text">
+                    <a class="item__title" [routerLink]="['/staff/items', item.id, 'suggestions']">
+                      {{ item.internalDescription || item.categoryName }}
+                    </a>
+                    <span class="muted"
+                      >{{ item.categoryName }} · {{ item.block }}, {{ item.room }} · achado em
+                      {{ formatDay(item.foundOn) }}</span
+                    >
+                    <span class="muted">Na sala desde {{ formatDate(item.registeredAt) }}</span>
+                    @if (isAdmin() && disposing()?.id !== item.id) {
+                      <button
+                        class="button button--secondary item__action"
+                        type="button"
+                        (click)="open(item)"
+                      >
+                        Registrar destino
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                @if (disposing()?.id === item.id) {
+                  <div class="panel">
+                    <p class="field__label" id="destination-label">Destino</p>
+                    <div
+                      class="choices choices--compact"
+                      role="radiogroup"
+                      aria-labelledby="destination-label"
+                    >
+                      @for (option of destinations; track option.code) {
+                        <label class="choice">
+                          <input type="radio" [formControl]="destination" [value]="option.code" />
+                          <span class="choice__box">{{ option.label }}</span>
+                        </label>
+                      }
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="note">
+                        Observação
+                        @if (destination.value !== 'OTHER') {
+                          <span class="optional">(opcional)</span>
+                        }
+                      </label>
+                      <input
+                        id="note"
+                        class="input"
+                        type="text"
+                        maxlength="200"
+                        [placeholder]="
+                          destination.value === 'OTHER' ? 'Ex.: doado ao projeto social' : ''
+                        "
+                        [formControl]="note"
+                        [attr.aria-invalid]="noteError() ? true : null"
+                        [attr.aria-describedby]="noteError() ? 'note-error' : null"
+                      />
+                      @if (noteError(); as message) {
+                        <span id="note-error" class="field__error">{{ message }}</span>
+                      }
+                    </div>
+                    <app-error-message [error]="error()" />
+                    <p class="warning">O objeto sai da sala de vez. Isso não pode ser desfeito.</p>
+                    <div class="actions">
+                      <button
+                        class="button"
+                        type="button"
+                        (click)="confirm()"
+                        [disabled]="saving()"
+                      >
+                        {{ saving() ? 'Registrando…' : 'Confirmar destino' }}
+                      </button>
+                      <button
+                        class="button button--secondary"
+                        type="button"
+                        (click)="disposing.set(null)"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+}

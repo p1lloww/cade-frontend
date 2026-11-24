@@ -32,6 +32,11 @@ export default [
     loadComponent: () => import('./counter/walk-in/walk-in-page'),
   },
   {
+    path: 'unclaimed',
+    title: 'Não reclamados · Cadê?',
+    loadComponent: () => import('./unclaimed/unclaimed-page'),
+  },
+  {
     path: 'counter',
     title: 'Balcão · Cadê?',
     loadComponent: () => import('./counter/counter-list/counter-list-page'),
