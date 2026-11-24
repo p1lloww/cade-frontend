@@ -1,0 +1,67 @@
+<a class="back" routerLink="/staff">Voltar à área da sala</a>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando as sugestões…</p>
+  }
+  @case ('error') {
+    <h1>Sugestões</h1>
+    <app-error-message [error]="error()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (item(); as item) {
+      <section class="item" aria-labelledby="item-title">
+        <app-api-photo
+          class="item__photo"
+          [path]="item.photoPath"
+          [alt]="'Foto do objeto: ' + item.categoryName"
+        />
+        <div>
+          <p class="item__category">{{ item.categoryName }} · {{ item.statusLabel }}</p>
+          <h1 id="item-title">{{ item.internalDescription || item.categoryName }}</h1>
+          <p class="muted">
+            {{ item.block }}, {{ item.room }} · {{ formatDay(item.foundOn) }} ·
+            {{ item.storageBox }}
+          </p>
+        </div>
+      </section>
+    }
+
+    <h2>
+      Sugestões <span class="muted count">({{ suggestions().length }})</span>
+    </h2>
+    @if (suggestions().length === 0) {
+      <p class="empty">
+        Nenhuma perda parecida por enquanto. Quando um estudante registrar algo compatível, a
+        sugestão aparece aqui.
+      </p>
+    } @else {
+      <ol class="suggestions">
+        @for (suggestion of suggestions(); track suggestion.id) {
+          <li>
+            <a class="suggestion" [routerLink]="['/staff/suggestions', suggestion.id]">
+              <div class="suggestion__head">
+                <span class="tag" [class]="bandTag[suggestion.band]">
+                  Compatibilidade {{ suggestion.bandLabel.toLowerCase() }} · {{ suggestion.score }}
+                </span>
+                @if (suggestion.status !== 'NEW') {
+                  <span class="tag tag--neutral">{{ suggestion.statusLabel }}</span>
+                }
+              </div>
+              <span class="suggestion__title">{{ suggestion.lossReport.description }}</span>
+              <span class="muted">
+                {{ places(suggestion) }} ·
+                {{ formatPeriod(suggestion.lossReport.lostFrom, suggestion.lossReport.lostUntil) }}
+                @if (suggestion.lossReport.shift) {
+                  · {{ suggestion.lossReport.shift }}
+                }
+              </span>
+              <span class="suggestion__cta">Comparar</span>
+            </a>
+          </li>
+        }
+      </ol>
+    }
+  }
+}

@@ -31,7 +31,9 @@
       <button class="button button--large" type="button" (click)="registerAnother()">
         Cadastrar outro
       </button>
-      <a class="button button--secondary" routerLink="/staff">Voltar ao início</a>
+      <a class="button button--secondary" [routerLink]="['/staff/items', item.id, 'suggestions']">
+        Ver sugestões
+      </a>
     </div>
   </section>
 } @else {

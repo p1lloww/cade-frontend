@@ -1,0 +1,209 @@
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando a sugestão…</p>
+  }
+  @case ('error') {
+    <h1>Sugestão</h1>
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (suggestion(); as s) {
+      <a class="back" [routerLink]="['/staff/items', s.foundItem.id, 'suggestions']"
+        >Voltar às sugestões do objeto</a
+      >
+
+      <div class="title">
+        <h1>Comparar</h1>
+        <span class="tag" [class]="bandTag[s.band]"
+          >Compatibilidade {{ s.bandLabel.toLowerCase() }} · {{ s.score }} de 100</span
+        >
+        <span class="tag tag--neutral">Sugestão {{ s.statusLabel.toLowerCase() }}</span>
+      </div>
+
+      @if (notice(); as text) {
+        <div id="notice" class="alert alert--success" role="status" tabindex="-1">
+          <p>{{ text }}</p>
+          @if (summons(); as summons) {
+            <p class="summons">
+              Reservado até <strong>{{ formatDate(summons.expiresAt) }}</strong
+              >. {{ summons.whatToBring }}
+            </p>
+          }
+        </div>
+      }
+
+      <div class="photos">
+        <figure>
+          <app-api-photo
+            class="photo"
+            [path]="s.foundItem.photoPath"
+            [alt]="'Foto do objeto: ' + s.foundItem.categoryName"
+          />
+          <figcaption>Foto do objeto</figcaption>
+        </figure>
+        @if (s.lossReport.proofPath; as proof) {
+          <figure>
+            <app-api-photo
+              class="photo"
+              [path]="proof"
+              alt="Foto da prova enviada pelo estudante"
+            />
+            <figcaption>Prova do estudante</figcaption>
+          </figure>
+        }
+      </div>
+
+      <!-- Uma linha por dado, com o objeto e a perda lado a lado; no celular, cada linha vira um cartão. -->
+      <table class="compare">
+        <caption class="visually-hidden">
+          Objeto achado comparado com a perda do estudante
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">Dado</span></th>
+            <th scope="col">Objeto achado</th>
+            <th scope="col">Perda do estudante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Categoria</th>
+            <td data-side="Objeto">{{ s.foundItem.categoryName }}</td>
+            <td data-side="Perda">{{ s.lossReport.categoryName }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Quando</th>
+            <td data-side="Objeto">Achado em {{ formatDay(s.foundItem.foundOn) }}</td>
+            <td data-side="Perda">
+              {{ formatPeriod(s.lossReport.lostFrom, s.lossReport.lostUntil) }} ·
+              {{ s.lossReport.shift || 'turno não informado' }}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Onde</th>
+            <td data-side="Objeto">{{ s.foundItem.block }}, {{ s.foundItem.room }}</td>
+            <td data-side="Perda">{{ places(s) }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Descrição</th>
+            <td data-side="Objeto">{{ s.foundItem.internalDescription || 'Não informada' }}</td>
+            <td data-side="Perda" class="strong">{{ s.lossReport.description }}</td>
+          </tr>
+          <tr class="reserved">
+            <th scope="row">O que só o dono saberia</th>
+            <td data-side="Objeto">{{ s.foundItem.reservedDetails || 'Não informado' }}</td>
+            <td data-side="Perda">{{ s.lossReport.secretDetail || 'Não informado' }}</td>
+          </tr>
+          @if (s.lossReport.proofSerialNumber) {
+            <tr>
+              <th scope="row">Número de série</th>
+              <td data-side="Objeto">Conferir no objeto</td>
+              <td data-side="Perda">{{ s.lossReport.proofSerialNumber }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="muted where">
+        Guardado na {{ s.foundItem.storageBox }} · risco {{ s.foundItem.riskLabel.toLowerCase() }}
+      </p>
+
+      @if (s.status === 'NEW') {
+        <section class="decide" aria-labelledby="decide-title">
+          <h2 id="decide-title">Decisão</h2>
+          <app-error-message [error]="error()" />
+
+          @switch (decision()) {
+            @case ('summon') {
+              <div class="panel">
+                <p>
+                  O objeto fica <strong>reservado</strong> e o estudante recebe um e-mail com o
+                  local, o horário, o prazo e o que levar. As outras sugestões deste objeto ficam em
+                  espera.
+                </p>
+                <div class="panel__actions">
+                  <button
+                    id="confirm-summon"
+                    class="button"
+                    type="button"
+                    (click)="confirm()"
+                    [disabled]="sending()"
+                  >
+                    {{ sending() ? 'Convocando…' : 'Confirmar convocação' }}
+                  </button>
+                  <button class="button button--secondary" type="button" (click)="close()">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            }
+            @case (null) {
+              <div class="decisions">
+                <button class="button button--large" type="button" (click)="open('summon')">
+                  Convocar estudante
+                </button>
+                <button class="button button--secondary" type="button" (click)="open('info')">
+                  Pedir mais informações
+                </button>
+                <button class="button button--secondary" type="button" (click)="open('discard')">
+                  Descartar
+                </button>
+              </div>
+            }
+            @default {
+              <div class="panel">
+                <div class="field">
+                  <label class="field__label" for="reason">
+                    {{ decision() === 'info' ? 'O que você precisa saber?' : 'Por que descartar?' }}
+                  </label>
+                  <span id="reason-hint" class="field__hint">
+                    @if (decision() === 'info') {
+                      A pergunta vai para o estudante por e-mail. Não cite nada do objeto achado.
+                    } @else {
+                      O motivo fica no histórico. O estudante não é avisado.
+                    }
+                  </span>
+                  <textarea
+                    id="reason"
+                    class="input input--area"
+                    rows="3"
+                    [formControl]="reason"
+                    [attr.maxlength]="maxReasonLength"
+                    [placeholder]="
+                      decision() === 'info'
+                        ? 'Ex.: a capa tem alguma marca? Qual?'
+                        : 'Ex.: cor diferente da descrição'
+                    "
+                    [attr.aria-invalid]="reasonError() ? true : null"
+                    [attr.aria-describedby]="
+                      reasonError() ? 'reason-hint reason-error' : 'reason-hint'
+                    "
+                  ></textarea>
+                  @if (reasonError(); as message) {
+                    <span id="reason-error" class="field__error">{{ message }}</span>
+                  }
+                </div>
+                <div class="panel__actions">
+                  <button class="button" type="button" (click)="confirm()" [disabled]="sending()">
+                    @if (sending()) {
+                      Enviando…
+                    } @else {
+                      {{ decision() === 'info' ? 'Enviar pergunta' : 'Descartar sugestão' }}
+                    }
+                  </button>
+                  <button class="button button--secondary" type="button" (click)="close()">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </section>
+      } @else if (!notice()) {
+        <p class="alert alert--info">
+          Esta sugestão está {{ s.statusLabel.toLowerCase() }}: não há decisão a tomar.
+        </p>
+      }
+    }
+  }
+}
