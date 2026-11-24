@@ -71,6 +71,11 @@ interface Shortcut {
 export default class AdminHome {
   protected readonly shortcuts: Shortcut[] = [
     {
+      path: '/admin/dashboard',
+      title: 'Painel',
+      text: 'Devoluções, tempo médio e objetos por situação.',
+    },
+    {
       path: '/admin/team',
       title: 'Equipe da sala',
       text: 'Dar e retirar o perfil de funcionário.',

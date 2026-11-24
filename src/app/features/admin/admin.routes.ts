@@ -17,4 +17,9 @@ export default [
     title: 'Prazos · Cadê?',
     loadComponent: () => import('./deadlines/deadlines-page'),
   },
+  {
+    path: 'dashboard',
+    title: 'Painel · Cadê?',
+    loadComponent: () => import('./dashboard/dashboard-page'),
+  },
 ] satisfies Routes;

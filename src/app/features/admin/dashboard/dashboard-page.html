@@ -1,0 +1,97 @@
+<a class="back" routerLink="/admin">Voltar à administração</a>
+<div class="top">
+  <h1>Painel</h1>
+  @if (data(); as d) {
+    <p class="muted updated">
+      Atualizado às {{ updatedAt(d.generatedAt) }}
+      <button class="button--link" type="button" (click)="load()">Atualizar</button>
+    </p>
+  }
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando o painel…</p>
+  }
+  @case ('error') {
+    <app-error-message [error]="error()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (data(); as d) {
+      <ul class="tiles">
+        <li class="tile">
+          <span class="tile__label">Devoluções neste mês</span>
+          <span class="tile__value">{{ d.returnsThisMonth }}</span>
+        </li>
+        <li class="tile">
+          <span class="tile__label">Tempo médio até a devolução</span>
+          <span class="tile__value">
+            @if (d.averageDaysToReturn !== null && d.averageDaysToReturn < 1) {
+              <span class="tile__short">Menos de 1 dia</span>
+            } @else if (d.averageDaysToReturn !== null) {
+              {{ days(d.averageDaysToReturn) }}
+              <span class="tile__unit">{{ d.averageDaysToReturn === 1 ? 'dia' : 'dias' }}</span>
+            } @else {
+              <span class="tile__none">Sem devoluções ainda</span>
+            }
+          </span>
+        </li>
+        <li class="tile">
+          <span class="tile__label">Não reclamados</span>
+          <span class="tile__value">{{ d.unclaimed }}</span>
+          @if (d.unclaimed > 0) {
+            <a class="tile__link" routerLink="/staff/unclaimed">Ver e dar destino</a>
+          }
+        </li>
+        <li class="tile">
+          <span class="tile__label">Objetos cadastrados</span>
+          <span class="tile__value">{{ total() }}</span>
+        </li>
+      </ul>
+
+      <section class="section" aria-labelledby="status-title">
+        <h2 id="status-title">Objetos por situação</h2>
+        <ul class="bars">
+          @for (row of statuses(); track row.status) {
+            <li class="bar">
+              <span class="bar__label">{{ row.statusLabel }}</span>
+              <span class="bar__track" aria-hidden="true">
+                <span class="bar__fill" [style.width.%]="(row.total / maxStatus()) * 100"></span>
+              </span>
+              <span class="bar__value">{{ row.total }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="table-title">
+        <h2 id="table-title">Por categoria e situação</h2>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="table-title">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Categoria</th>
+                @for (column of table().columns; track column.status) {
+                  <th scope="col" class="num">{{ column.statusLabel }}</th>
+                }
+                <th scope="col" class="num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of table().rows; track row.category) {
+                <tr>
+                  <th scope="row">{{ row.category }}</th>
+                  @for (value of row.cells; track $index) {
+                    <td class="num" [class.zero]="value === 0">{{ value }}</td>
+                  }
+                  <td class="num strong">{{ row.total }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+}
