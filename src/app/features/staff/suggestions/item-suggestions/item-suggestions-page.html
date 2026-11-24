@@ -28,6 +28,13 @@
       </section>
     }
 
+    @if (item()?.status === 'AVAILABLE' || item()?.status === 'UNCLAIMED') {
+      <p class="walk-in">
+        Alguém veio buscar sem ter registrado a perda?
+        <a [routerLink]="['/staff/items', id(), 'walk-in']">Entregar sem registro</a>
+      </p>
+    }
+
     <h2>
       Sugestões <span class="muted count">({{ suggestions().length }})</span>
     </h2>

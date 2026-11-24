@@ -1,0 +1,182 @@
+<a class="back" routerLink="/staff/counter">Voltar ao balcão</a>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando a convocação…</p>
+  }
+  @case ('error') {
+    <h1>Atender</h1>
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (summons(); as summons) {
+      @if (suggestion(); as s) {
+        <h1>Atender</h1>
+
+        <section class="item" aria-label="Objeto">
+          <app-api-photo
+            class="item__photo"
+            [path]="s.foundItem.photoPath"
+            [alt]="'Foto do objeto: ' + s.foundItem.categoryName"
+          />
+          <div>
+            <p class="item__title">
+              {{ s.foundItem.internalDescription || s.foundItem.categoryName }}
+            </p>
+            <p class="item__box">
+              Pegue na <strong>{{ s.foundItem.storageBox }}</strong>
+            </p>
+            @if (step() !== 'picked-up' && step() !== 'refused') {
+              <p class="muted">
+                Risco {{ summons.riskLabel.toLowerCase() }} · reservado até
+                {{ formatDate(summons.expiresAt) }}
+              </p>
+            }
+          </div>
+        </section>
+
+        @switch (step()) {
+          @case ('picked-up') {
+            <div id="result" class="result result--ok" role="status" tabindex="-1">
+              <h2>Objeto entregue</h2>
+              <p>
+                A retirada ficou registrada no histórico, com o documento, a verificação, você e o
+                horário.
+              </p>
+              <a class="button" routerLink="/staff/counter">Voltar ao balcão</a>
+            </div>
+          }
+          @case ('refused') {
+            <div id="result" class="result result--refused" role="status" tabindex="-1">
+              <h2>Recusa registrada</h2>
+              @if (refusal(); as refusal) {
+                <p>
+                  O objeto volta a ficar disponível. Esta é a recusa
+                  {{ refusal.studentRefusals }} de {{ maxRefusals }} deste estudante.
+                </p>
+                @if (refusal.studentBlocked) {
+                  <p class="blocked">
+                    <strong>O estudante foi bloqueado</strong> e não abre novos registros até o
+                    administrador liberar.
+                  </p>
+                }
+              }
+              <a class="button" routerLink="/staff/counter">Voltar ao balcão</a>
+            </div>
+          }
+          @default {
+            <section aria-labelledby="checklist-title">
+              <h2 id="checklist-title">O que conferir</h2>
+              <ol class="checklist">
+                @for (item of summons.checklist; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ol>
+            </section>
+
+            <section class="compare" aria-label="Para conferir o detalhe">
+              <div>
+                <p class="compare__label">O estudante descreveu</p>
+                <p>{{ s.lossReport.description }}</p>
+                <p class="compare__label">Detalhe que só o dono sabe</p>
+                <p>{{ s.lossReport.secretDetail || 'Não informado' }}</p>
+              </div>
+              <div>
+                <p class="compare__label">Detalhe reservado do objeto</p>
+                <p>{{ s.foundItem.reservedDetails || 'Não informado' }}</p>
+              </div>
+            </section>
+
+            <app-error-message [error]="error()" />
+
+            @if (step() === 'refuse') {
+              <section class="panel panel--refuse" aria-labelledby="refuse-title">
+                <h2 id="refuse-title">Recusar a entrega</h2>
+                <p>
+                  Use quando a verificação falha. O objeto volta a ficar disponível e a recusa conta
+                  para o estudante: com {{ maxRefusals }}, ele não abre novos registros até o
+                  administrador liberar.
+                </p>
+                <div class="field">
+                  <label class="field__label" for="refusal-reason">Motivo</label>
+                  <textarea
+                    id="refusal-reason"
+                    class="input input--area"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="Ex.: não soube dizer o detalhe reservado"
+                    [formControl]="reason"
+                    [attr.aria-invalid]="fieldErrors()['reason'] ? true : null"
+                    [attr.aria-describedby]="fieldErrors()['reason'] ? 'reason-error' : null"
+                  ></textarea>
+                  @if (fieldErrors()['reason']; as message) {
+                    <span id="reason-error" class="field__error">{{ message }}</span>
+                  }
+                </div>
+                <div class="actions">
+                  <button
+                    class="button button--danger"
+                    type="button"
+                    (click)="confirmRefusal()"
+                    [disabled]="sending()"
+                  >
+                    {{ sending() ? 'Registrando…' : 'Confirmar recusa' }}
+                  </button>
+                  <button class="button button--secondary" type="button" (click)="backToCheck()">
+                    Voltar
+                  </button>
+                </div>
+              </section>
+            } @else {
+              <section class="panel" aria-labelledby="pickup-title">
+                <h2 id="pickup-title">Registrar a retirada</h2>
+                <app-check-fields
+                  [form]="checkForm"
+                  [verifications]="summons.acceptedVerifications"
+                  [errors]="fieldErrors()"
+                />
+
+                @if (step() === 'confirm-pickup') {
+                  <div class="confirm">
+                    <p>
+                      <strong>Confirmar a entrega?</strong> O objeto passa a devolvido e isso não
+                      pode ser desfeito.
+                    </p>
+                    <div class="actions">
+                      <button
+                        id="confirm-pickup"
+                        class="button"
+                        type="button"
+                        (click)="confirmPickup()"
+                        [disabled]="sending()"
+                      >
+                        {{ sending() ? 'Registrando…' : 'Confirmar entrega' }}
+                      </button>
+                      <button
+                        class="button button--secondary"
+                        type="button"
+                        (click)="backToCheck()"
+                      >
+                        Voltar
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="actions">
+                    <button class="button button--large" type="button" (click)="reviewPickup()">
+                      Entregar o objeto
+                    </button>
+                    <button class="button--link" type="button" (click)="startRefusal()">
+                      A verificação falhou: recusar
+                    </button>
+                  </div>
+                }
+              </section>
+            }
+          }
+        }
+      }
+    }
+  }
+}

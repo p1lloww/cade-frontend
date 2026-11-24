@@ -1,0 +1,140 @@
+<a class="back" [routerLink]="['/staff/items', id(), 'suggestions']">Voltar ao objeto</a>
+<h1>Entregar sem registro</h1>
+<p class="lead">
+  Para quem veio direto à sala, sem ter registrado a perda. Também vale para quem não tem conta.
+</p>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="muted" role="status">Carregando o objeto…</p>
+  }
+  @case ('error') {
+    <app-error-message [error]="loadError()" />
+    <button class="button button--secondary" type="button" (click)="load()">Tentar de novo</button>
+  }
+  @default {
+    @if (item(); as item) {
+      @if (check(); as check) {
+        <section class="item" aria-label="Objeto">
+          <app-api-photo
+            class="item__photo"
+            [path]="item.photoPath"
+            [alt]="'Foto do objeto: ' + item.categoryName"
+          />
+          <div>
+            <p class="item__title">{{ item.internalDescription || item.categoryName }}</p>
+            <p>
+              Pegue na <strong>{{ item.storageBox }}</strong>
+            </p>
+            <p class="muted">
+              {{ item.statusLabel }} · risco {{ check.riskLabel.toLowerCase() }} · achado em
+              {{ formatDay(item.foundOn) }}
+            </p>
+          </div>
+        </section>
+
+        @if (!check.canHandOver) {
+          <p class="alert alert--info">
+            Este objeto está {{ check.statusLabel.toLowerCase() }} e não sai pelo atalho. Se ele
+            está reservado, é de um estudante convocado: atenda pelo balcão.
+          </p>
+        } @else if (step() === 'done') {
+          <div id="result" class="result" role="status" tabindex="-1">
+            <h2>Objeto entregue</h2>
+            <p>
+              A retirada ficou registrada no histórico, e as sugestões deste objeto foram
+              encerradas.
+            </p>
+            <a class="button" routerLink="/staff">Voltar à área da sala</a>
+          </div>
+        } @else {
+          <section aria-labelledby="checklist-title">
+            <h2 id="checklist-title">O que conferir</h2>
+            <ol class="checklist">
+              @for (entry of check.checklist; track entry) {
+                <li>{{ entry }}</li>
+              }
+            </ol>
+            @if (item.reservedDetails) {
+              <p class="reserved">
+                <strong>Detalhe reservado do objeto:</strong> {{ item.reservedDetails }}
+              </p>
+            }
+          </section>
+
+          <app-error-message [error]="error()" />
+
+          <section class="panel" aria-labelledby="holder-title">
+            <h2 id="holder-title">Quem está retirando</h2>
+            <div
+              class="choices choices--compact"
+              role="radiogroup"
+              aria-label="Quem está retirando"
+            >
+              <label class="choice">
+                <input type="radio" [formControl]="holderType" value="STUDENT" />
+                <span class="choice__box">Estudante</span>
+              </label>
+              <label class="choice">
+                <input type="radio" [formControl]="holderType" value="VISITOR" />
+                <span class="choice__box">Pessoa sem conta</span>
+              </label>
+            </div>
+            <div class="field">
+              <label class="field__label" for="holderName">Nome completo</label>
+              <input
+                id="holderName"
+                class="input"
+                type="text"
+                maxlength="120"
+                autocomplete="off"
+                [formControl]="holderName"
+                [attr.aria-invalid]="fieldErrors()['holderName'] ? true : null"
+                [attr.aria-describedby]="fieldErrors()['holderName'] ? 'holderName-error' : null"
+              />
+              @if (fieldErrors()['holderName']; as message) {
+                <span id="holderName-error" class="field__error">{{ message }}</span>
+              }
+            </div>
+
+            <app-check-fields
+              [form]="checkForm"
+              [verifications]="check.acceptedVerifications"
+              [errors]="fieldErrors()"
+              [showEnrollment]="holder() === 'STUDENT'"
+            />
+
+            @if (step() === 'confirm') {
+              <div class="confirm">
+                <p>
+                  <strong>Confirmar a entrega?</strong> O objeto passa a devolvido e isso não pode
+                  ser desfeito.
+                </p>
+                <div class="actions">
+                  <button
+                    id="confirm-walk-in"
+                    class="button"
+                    type="button"
+                    (click)="confirm()"
+                    [disabled]="sending()"
+                  >
+                    {{ sending() ? 'Registrando…' : 'Confirmar entrega' }}
+                  </button>
+                  <button class="button button--secondary" type="button" (click)="back()">
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="actions">
+                <button class="button button--large" type="button" (click)="review()">
+                  Entregar o objeto
+                </button>
+              </div>
+            }
+          </section>
+        }
+      }
+    }
+  }
+}

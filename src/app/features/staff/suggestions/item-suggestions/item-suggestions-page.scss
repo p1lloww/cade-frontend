@@ -90,3 +90,14 @@
   color: var(--color-primary);
   font-weight: 700;
 }
+
+.walk-in {
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-sky-soft);
+}
+
+.walk-in a {
+  font-weight: 700;
+}

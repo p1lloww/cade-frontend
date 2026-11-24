@@ -1,0 +1,137 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: 600;
+}
+
+.item {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.item p {
+  margin: 0;
+}
+
+.item__photo {
+  flex-shrink: 0;
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+.item__title {
+  color: var(--color-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+// Onde pegar o objeto: é a primeira coisa que o funcionário precisa no balcão.
+.item .item__box {
+  margin: var(--space-1) 0;
+  color: var(--color-heading);
+  font-size: 1.0625rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+  color: var(--color-heading);
+}
+
+.compare {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-orange-soft);
+}
+
+.compare p {
+  margin: 0 0 var(--space-2);
+  color: var(--color-heading);
+  overflow-wrap: anywhere;
+}
+
+.compare .compare__label {
+  margin: 0;
+  color: var(--color-orange-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.panel {
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+
+.panel--refuse {
+  border-color: var(--color-error);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.confirm {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-sky-soft);
+}
+
+.confirm p {
+  margin: 0;
+}
+
+.button--danger {
+  border-color: #7d1714;
+  background: linear-gradient(180deg, #d0504b 0%, #b52a25 45%, #a3201c 60%, #8f1c18 100%);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #c0443f 0%, #a3201c 45%, #8f1c18 60%, #7d1714 100%);
+}
+
+.result {
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-lg);
+}
+
+.result:focus {
+  outline: none;
+}
+
+.result--ok {
+  background: var(--color-success-bg);
+}
+
+.result--refused {
+  background: var(--color-neutral-bg);
+}
+
+.blocked {
+  color: var(--color-error);
+}
+
+@media (min-width: 36rem) {
+  .compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}

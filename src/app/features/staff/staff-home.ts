@@ -18,7 +18,10 @@ import { FoundItemApi } from './found-items/found-item-api';
   template: `
     <div class="top">
       <h1>Área da sala</h1>
-      <a class="button button--large" routerLink="/staff/items/new">Cadastrar objeto</a>
+      <div class="top__actions">
+        <a class="button button--large" routerLink="/staff/items/new">Cadastrar objeto</a>
+        <a class="button button--secondary" routerLink="/staff/counter">Balcão</a>
+      </div>
     </div>
 
     <h2>Últimos objetos disponíveis</h2>
@@ -75,6 +78,13 @@ import { FoundItemApi } from './found-items/found-item-api';
 
     .top h1 {
       margin: 0;
+    }
+
+    .top__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3);
     }
 
     h2 {
