@@ -76,6 +76,16 @@ export default class AdminHome {
       text: 'Dar e retirar o perfil de funcionário.',
     },
     {
+      path: '/admin/categories',
+      title: 'Categorias',
+      text: 'Nome, risco padrão e perguntas de conferência.',
+    },
+    {
+      path: '/admin/deadlines',
+      title: 'Prazos',
+      text: 'Guarda na sala, retirada e validade do registro.',
+    },
+    {
       path: '/staff/unclaimed',
       title: 'Não reclamados',
       text: 'Objetos com mais de 90 dias na sala, por caixa, e o destino deles.',
