@@ -12,9 +12,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './public-home.scss',
 })
 export default class PublicHome {
-  // Enquanto as telas de registro (PER-02) e de "Meus registros" (PER-04) não existem, os dois levam à área do
-  // estudante.
-  protected readonly registerLossUrl = '/student';
+  protected readonly registerLossUrl = '/student/losses/new';
+  // Enquanto a tela de "Meus registros" (PER-04) não existe, leva à área do estudante.
   protected readonly myLossesUrl = '/student';
 
   protected readonly steps = [
