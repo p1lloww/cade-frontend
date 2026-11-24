@@ -12,6 +12,7 @@ import NewFoundItemPage from './new-found-item-page';
 const CATEGORIES = [
   { id: 'c-fone', name: 'Fone', defaultRisk: 'MEDIUM', defaultRiskLabel: 'Médio' },
   { id: 'c-garrafa', name: 'Garrafa', defaultRisk: 'LOW', defaultRiskLabel: 'Baixo' },
+  { id: 'c-doc', name: 'Documentos', defaultRisk: 'DOCUMENT', defaultRiskLabel: 'Documento' },
 ];
 
 const REGISTERED = {
@@ -256,5 +257,11 @@ describe('NewFoundItemPage', () => {
     expect(page.querySelector('[role="alert"]')?.textContent).toContain(
       'não deu para marcar quem é o dono',
     );
+  });
+
+  it('não oferece outro risco para documento, que nunca muda', async () => {
+    await check('Documentos');
+    const options = [...page.querySelectorAll('#risk option')].map((o) => o.textContent?.trim());
+    expect(options).toEqual(['Documento (padrão da categoria)']);
   });
 });

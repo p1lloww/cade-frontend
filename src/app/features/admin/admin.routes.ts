@@ -7,4 +7,14 @@ export default [
     title: 'Equipe da sala · Cadê?',
     loadComponent: () => import('./team/team-page'),
   },
+  {
+    path: 'categories',
+    title: 'Categorias · Cadê?',
+    loadComponent: () => import('./categories/categories-page'),
+  },
+  {
+    path: 'deadlines',
+    title: 'Prazos · Cadê?',
+    loadComponent: () => import('./deadlines/deadlines-page'),
+  },
 ] satisfies Routes;

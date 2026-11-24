@@ -16,7 +16,7 @@ import { ApiError } from '../../../../core/api/api-error';
 import {
   Category,
   RISK_LABELS,
-  RISK_LEVELS,
+  allowedRisks,
   RiskLevel,
 } from '../../../../shared/categories/category';
 import { CategoryApi } from '../../../../shared/categories/category-api';
@@ -91,8 +91,10 @@ export default class NewFoundItemPage {
   /** O risco só pode subir em relação ao da categoria (RN04): as opções começam no padrão dela. */
   protected readonly riskOptions = computed(() => {
     const category = this.categories().find(({ id }) => id === this.categoryId());
-    const from = category ? RISK_LEVELS.indexOf(category.defaultRisk) : 0;
-    return RISK_LEVELS.slice(from + 1).map((level) => ({ level, label: RISK_LABELS[level] }));
+    return (category ? allowedRisks(category.defaultRisk).slice(1) : []).map((level) => ({
+      level,
+      label: RISK_LABELS[level],
+    }));
   });
   protected readonly defaultRiskLabel = computed(
     () => this.categories().find(({ id }) => id === this.categoryId())?.defaultRiskLabel ?? null,

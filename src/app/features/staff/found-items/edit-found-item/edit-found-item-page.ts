@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { finalize, forkJoin, Observable } from 'rxjs';
 import { ApiError } from '../../../../core/api/api-error';
 import {
+  allowedRisks,
   Category,
   RISK_LABELS,
   RISK_LEVELS,
@@ -87,8 +88,10 @@ export default class EditFoundItemPage {
   /** O risco nunca fica abaixo do padrão da categoria escolhida (RN04). */
   protected readonly riskOptions = computed(() => {
     const category = this.categories().find(({ id }) => id === this.categoryId());
-    const from = category ? RISK_LEVELS.indexOf(category.defaultRisk) : 0;
-    return RISK_LEVELS.slice(from).map((level) => ({ level, label: RISK_LABELS[level] }));
+    return (category ? allowedRisks(category.defaultRisk) : RISK_LEVELS).map((level) => ({
+      level,
+      label: RISK_LABELS[level],
+    }));
   });
 
   constructor() {
